@@ -68,9 +68,7 @@ impl PtzDispatcher {
     }
 
     fn get_controller(&self) -> Result<&dyn PtzController, PtzError> {
-        self.controller
-            .as_deref()
-            .ok_or(PtzError::NotConnected)
+        self.controller.as_deref().ok_or(PtzError::NotConnected)
     }
 
     pub async fn move_absolute(&self, pan: f64, tilt: f64, zoom: f64) -> Result<(), PtzError> {
@@ -78,7 +76,9 @@ impl PtzDispatcher {
     }
 
     pub async fn move_relative(&self, pan_delta: f64, tilt_delta: f64) -> Result<(), PtzError> {
-        self.get_controller()?.move_relative(pan_delta, tilt_delta).await
+        self.get_controller()?
+            .move_relative(pan_delta, tilt_delta)
+            .await
     }
 
     pub async fn zoom_to(&self, zoom: f64) -> Result<(), PtzError> {

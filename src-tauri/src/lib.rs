@@ -9,6 +9,8 @@ pub mod birddog;
 pub mod panasonic;
 pub mod visca;
 
+use tauri::Manager;
+
 use persistence::config::AppConfig;
 use persistence::profiles::ProfileStore;
 use ptz::controller::PtzDispatcher;

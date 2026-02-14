@@ -59,10 +59,7 @@ pub async fn ptz_move_absolute(
 
 /// Set zoom level.
 #[tauri::command]
-pub async fn ptz_zoom(
-    state: tauri::State<'_, AppState>,
-    zoom: f64,
-) -> Result<(), String> {
+pub async fn ptz_zoom(state: tauri::State<'_, AppState>, zoom: f64) -> Result<(), String> {
     let zoom = zoom.clamp(0.0, 1.0);
 
     // Update local position tracking
@@ -73,10 +70,7 @@ pub async fn ptz_zoom(
     // Dispatch to active PTZ controller if connected
     let dispatcher = state.ptz_dispatcher.lock().await;
     if dispatcher.has_controller() {
-        dispatcher
-            .zoom_to(zoom)
-            .await
-            .map_err(|e| e.to_string())?;
+        dispatcher.zoom_to(zoom).await.map_err(|e| e.to_string())?;
     }
 
     Ok(())
@@ -89,9 +83,7 @@ pub async fn ptz_recall_preset(
     preset_id: String,
 ) -> Result<(), String> {
     let profiles = state.profiles.lock().await;
-    let preset = profiles
-        .find_preset(&preset_id)
-        .ok_or("Preset not found")?;
+    let preset = profiles.find_preset(&preset_id).ok_or("Preset not found")?;
 
     let pan = preset.pan;
     let tilt = preset.tilt;
@@ -117,7 +109,10 @@ pub async fn ptz_recall_preset(
 
     log::info!(
         "PTZ recall preset '{}': pan={}, tilt={}, zoom={}",
-        name, pan, tilt, zoom
+        name,
+        pan,
+        tilt,
+        zoom
     );
     Ok(())
 }
@@ -142,9 +137,7 @@ pub async fn ptz_store_preset(
 
 /// Get the current PTZ position.
 #[tauri::command]
-pub async fn ptz_get_position(
-    state: tauri::State<'_, AppState>,
-) -> Result<PtzPosition, String> {
+pub async fn ptz_get_position(state: tauri::State<'_, AppState>) -> Result<PtzPosition, String> {
     // If we have an active controller, query the camera for its real position
     let dispatcher = state.ptz_dispatcher.lock().await;
     if dispatcher.has_controller() {

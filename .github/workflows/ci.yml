@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
 
 jobs:
   check:
@@ -40,6 +39,9 @@ jobs:
 
       - name: Typecheck frontend
         run: npx tsc --noEmit
+
+      - name: Test frontend
+        run: npx vitest run
 
       # Rust checks
       - name: Check Rust formatting

@@ -10,7 +10,6 @@
     "beforeBuildCommand": "npm run build"
   },
   "app": {
-    "title": "PTZ Cam Controller",
     "windows": [
       {
         "title": "PTZ Cam Controller",

@@ -29,6 +29,7 @@ Thumbs.db
 
 # Tauri
 src-tauri/target/
+src-tauri/gen/
 
 # Logs
 *.log

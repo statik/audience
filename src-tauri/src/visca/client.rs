@@ -17,8 +17,7 @@ pub struct ViscaClient {
 
 impl ViscaClient {
     pub fn new(host: &str, port: u16) -> Result<Self, PtzError> {
-        crate::ptz::types::validate_host(host)
-            .map_err(PtzError::ConnectionFailed)?;
+        crate::ptz::types::validate_host(host).map_err(PtzError::ConnectionFailed)?;
         Ok(Self {
             socket: Mutex::new(None),
             host: host.to_string(),
@@ -54,10 +53,7 @@ impl ViscaClient {
             .map_err(|e| PtzError::CommandFailed(e.to_string()))?;
 
         let mut buf = [0u8; 256];
-        let timeout = tokio::time::timeout(
-            std::time::Duration::from_secs(2),
-            s.recv(&mut buf),
-        );
+        let timeout = tokio::time::timeout(std::time::Duration::from_secs(2), s.recv(&mut buf));
 
         match timeout.await {
             Ok(Ok(len)) => Ok(buf[..len].to_vec()),
@@ -65,7 +61,6 @@ impl ViscaClient {
             Err(_) => Err(PtzError::Timeout("VISCA response timeout".to_string())),
         }
     }
-
 }
 
 #[async_trait]

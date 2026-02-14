@@ -1,10 +1,4 @@
-use axum::{
-    body::Body,
-    http::header,
-    response::Response,
-    routing::get,
-    Router,
-};
+use axum::{body::Body, http::header, response::Response, routing::get, Router};
 use std::sync::Arc;
 use tokio::sync::broadcast;
 
@@ -13,6 +7,12 @@ const BOUNDARY: &str = "mjpeg_boundary";
 /// Shared state for the MJPEG server.
 pub struct MjpegState {
     pub frame_sender: broadcast::Sender<Vec<u8>>,
+}
+
+impl Default for MjpegState {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl MjpegState {
@@ -31,9 +31,7 @@ impl MjpegState {
 }
 
 /// Handle for the MJPEG stream endpoint.
-async fn stream_handler(
-    state: axum::extract::State<Arc<MjpegState>>,
-) -> Response<Body> {
+async fn stream_handler(state: axum::extract::State<Arc<MjpegState>>) -> Response<Body> {
     let mut receiver = state.frame_sender.subscribe();
 
     let stream = async_stream::stream! {

@@ -3,9 +3,7 @@ use crate::AppState;
 
 /// Get current application settings.
 #[tauri::command]
-pub async fn get_settings(
-    state: tauri::State<'_, AppState>,
-) -> Result<AppConfig, String> {
+pub async fn get_settings(state: tauri::State<'_, AppState>) -> Result<AppConfig, String> {
     let config = state.config.lock().await;
     Ok(config.clone())
 }

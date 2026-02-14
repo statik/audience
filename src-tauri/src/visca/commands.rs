@@ -1,5 +1,5 @@
-/// VISCA command encoding for Sony and compatible PTZ cameras.
-/// VISCA-over-IP uses UDP with a framing header.
+//! VISCA command encoding for Sony and compatible PTZ cameras.
+//! VISCA-over-IP uses UDP with a framing header.
 
 /// VISCA-over-IP framing header (8 bytes).
 pub struct ViscaIpHeader {
@@ -45,8 +45,12 @@ pub fn pan_tilt_absolute(pan_speed: u8, tilt_speed: u8, pan: i16, tilt: i16) -> 
     let pan_bytes = (pan as u16).to_be_bytes();
     let tilt_bytes = (tilt as u16).to_be_bytes();
     vec![
-        0x81, 0x01, 0x06, 0x02,
-        pan_speed, tilt_speed,
+        0x81,
+        0x01,
+        0x06,
+        0x02,
+        pan_speed,
+        tilt_speed,
         // Pan position (4 nibbles)
         (pan_bytes[0] >> 4) & 0x0F,
         pan_bytes[0] & 0x0F,
@@ -67,10 +71,7 @@ pub fn pan_tilt_absolute(pan_speed: u8, tilt_speed: u8, pan: i16, tilt: i16) -> 
 /// 01=left, 02=right, 03=stop for pan
 pub fn pan_tilt_relative(pan_speed: u8, tilt_speed: u8, pan_dir: u8, tilt_dir: u8) -> Vec<u8> {
     vec![
-        0x81, 0x01, 0x06, 0x01,
-        pan_speed, tilt_speed,
-        pan_dir, tilt_dir,
-        0xFF,
+        0x81, 0x01, 0x06, 0x01, pan_speed, tilt_speed, pan_dir, tilt_dir, 0xFF,
     ]
 }
 
@@ -83,7 +84,10 @@ pub fn pan_tilt_stop() -> Vec<u8> {
 pub fn zoom_absolute(position: u16) -> Vec<u8> {
     let bytes = position.to_be_bytes();
     vec![
-        0x81, 0x01, 0x04, 0x47,
+        0x81,
+        0x01,
+        0x04,
+        0x47,
         (bytes[0] >> 4) & 0x0F,
         bytes[0] & 0x0F,
         (bytes[1] >> 4) & 0x0F,

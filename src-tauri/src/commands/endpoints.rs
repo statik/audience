@@ -69,34 +69,24 @@ pub async fn set_active_endpoint(
 ) -> Result<(), String> {
     // Look up the endpoint configuration
     let endpoints = state.endpoints.lock().await;
-    let endpoint = endpoints
-        .get(&endpoint_id)
-        .ok_or("Endpoint not found")?;
+    let endpoint = endpoints.get(&endpoint_id).ok_or("Endpoint not found")?;
     drop(endpoints);
 
     // Create the appropriate protocol controller
     let controller: Box<dyn crate::ptz::controller::PtzController> = match &endpoint.config {
-        ProtocolConfig::Ndi => {
-            Box::new(crate::ndi::ptz::NdiPtzController::new())
-        }
-        ProtocolConfig::Visca { host, port } => {
-            Box::new(
-                crate::visca::client::ViscaClient::new(host, *port)
-                    .map_err(|e| format!("Failed to create VISCA client: {}", e))?,
-            )
-        }
-        ProtocolConfig::PanasonicAw { host, port, .. } => {
-            Box::new(
-                crate::panasonic::client::PanasonicClient::new(host, *port)
-                    .map_err(|e| format!("Failed to create Panasonic client: {}", e))?,
-            )
-        }
-        ProtocolConfig::BirdDogRest { host, port } => {
-            Box::new(
-                crate::birddog::client::BirdDogClient::new(host, *port)
-                    .map_err(|e| format!("Failed to create BirdDog client: {}", e))?,
-            )
-        }
+        ProtocolConfig::Ndi => Box::new(crate::ndi::ptz::NdiPtzController::new()),
+        ProtocolConfig::Visca { host, port } => Box::new(
+            crate::visca::client::ViscaClient::new(host, *port)
+                .map_err(|e| format!("Failed to create VISCA client: {}", e))?,
+        ),
+        ProtocolConfig::PanasonicAw { host, port, .. } => Box::new(
+            crate::panasonic::client::PanasonicClient::new(host, *port)
+                .map_err(|e| format!("Failed to create Panasonic client: {}", e))?,
+        ),
+        ProtocolConfig::BirdDogRest { host, port } => Box::new(
+            crate::birddog::client::BirdDogClient::new(host, *port)
+                .map_err(|e| format!("Failed to create BirdDog client: {}", e))?,
+        ),
     };
 
     // Set the controller on the dispatcher
@@ -105,24 +95,24 @@ pub async fn set_active_endpoint(
     drop(dispatcher);
 
     *state.active_endpoint_id.lock().await = Some(endpoint_id.clone());
-    log::info!("Active endpoint set to '{}' ({})", endpoint.name, endpoint_id);
+    log::info!(
+        "Active endpoint set to '{}' ({})",
+        endpoint.name,
+        endpoint_id
+    );
     Ok(())
 }
 
 /// Test connectivity to a camera endpoint.
 #[tauri::command]
-pub async fn test_endpoint_connection(
-    config: ProtocolConfig,
-) -> Result<String, String> {
+pub async fn test_endpoint_connection(config: ProtocolConfig) -> Result<String, String> {
     match config {
-        ProtocolConfig::Ndi => {
-            Ok("NDI connection test: NDI SDK not linked".to_string())
-        }
+        ProtocolConfig::Ndi => Ok("NDI connection test: NDI SDK not linked".to_string()),
         ProtocolConfig::Visca { host, port } => {
             use crate::ptz::controller::PtzController;
             use crate::visca::client::ViscaClient;
-            let client = ViscaClient::new(&host, port)
-                .map_err(|e| format!("VISCA init failed: {}", e))?;
+            let client =
+                ViscaClient::new(&host, port).map_err(|e| format!("VISCA init failed: {}", e))?;
             match client.test_connection().await {
                 Ok(()) => Ok("VISCA connection successful".to_string()),
                 Err(e) => Err(format!("VISCA connection failed: {}", e)),
