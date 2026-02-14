@@ -1,97 +1,125 @@
 # Creating a Test Release
 
-This document describes how the GitHub Actions release pipeline works and how to create a test (pre-release) build.
+This document describes how the automated release pipeline works and how to trigger releases.
 
 ## How the Release Pipeline Works
 
-The release workflow (`.github/workflows/release.yml`) is triggered by pushing a git tag matching the pattern `v*.*.*`. It runs three jobs in sequence:
+Releases are fully automated via [semantic-release](https://semantic-release.gitbook.io/). When commits are pushed (or merged) to `main`, the release workflow analyzes commit messages and automatically:
 
-1. **validate-version** -- Ensures the git tag version matches `package.json`
-2. **build** -- Builds signed binaries for Windows (MSI, NSIS exe) and macOS (universal DMG)
-3. **publish-release** -- Collects artifacts, generates a changelog, and creates a GitHub Release
+1. Determines the next version based on conventional commit types
+2. Updates version numbers in `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`
+3. Generates a `CHANGELOG.md` entry
+4. Commits the version bump with `[skip ci]`
+5. Creates a git tag (`v*.*.*`)
+6. Creates a GitHub Release with structured release notes
+7. Builds signed binaries for Windows and macOS
+8. Uploads build artifacts to the GitHub Release
 
-Tags containing a hyphen (e.g. `v0.2.0-rc.1`) are automatically marked as **pre-release** on GitHub.
+### Version Bump Rules
+
+| Commit type | Example | Version bump |
+|---|---|---|
+| `fix:` | `fix: correct pan speed calculation` | Patch (0.0.x) |
+| `feat:` | `feat: add preset recall buttons` | Minor (0.x.0) |
+| `feat!:` or `BREAKING CHANGE:` | `feat!: drop VISCA serial support` | Major (x.0.0) |
+| `docs:`, `chore:`, `ci:`, etc. | `docs: update README` | No release |
 
 ## Steps to Create a Test Release
 
-### 1. Bump the version
+### 1. Write your changes using conventional commits
 
-Use the version-bump script to sync the version across `package.json`, `src-tauri/Cargo.toml`, and `src-tauri/tauri.conf.json`:
-
-```bash
-# Explicit version with pre-release suffix
-npm run version-bump 0.2.0-rc.1
-
-# Or bump by semver level (major, minor, patch) -- no pre-release suffix
-npm run version-bump patch
-```
-
-Verify the version was updated in all three files:
+All commits must follow [Conventional Commits](https://www.conventionalcommits.org/) format. This is enforced by commitlint locally (via husky git hook) and in CI (on pull requests).
 
 ```bash
-grep '"version"' package.json src-tauri/tauri.conf.json
-grep '^version' src-tauri/Cargo.toml
+git commit -m "feat: add camera group selection"
+git commit -m "fix(visca): handle timeout on preset recall"
 ```
 
-### 2. Commit the version bump
+### 2. Open a pull request
 
-```bash
-git add package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
-git commit -m "chore: bump version to 0.2.0-rc.1"
-```
+Push your branch and open a PR. CI will:
+- Lint commit messages (commitlint)
+- Run formatting, type, and lint checks on all platforms
+- Run all tests
 
-### 3. Run checks before tagging
+### 3. Merge to main
 
-```bash
-just check
-just test
-```
+Once CI passes and the PR is approved, merge it. The release workflow triggers automatically.
 
-### 4. Tag the commit
+### 4. Monitor the workflow
 
-The tag **must** start with `v` and match the version in `package.json` exactly, otherwise the `validate-version` job will fail.
+Go to the repository's **Actions** tab to watch the release run:
 
-```bash
-git tag v0.2.0-rc.1
-```
+- **release** -- semantic-release analyzes commits, bumps version, creates tag and GitHub Release
+- **build** -- Runs only if a new release was published; builds Tauri app on `windows-latest` and `macos-latest` in parallel
+- **upload-assets** -- Uploads build artifacts to the GitHub Release
 
-### 5. Push the commit and tag
+If no release-triggering commits are found (e.g. only `docs:` or `chore:` commits), the workflow exits without creating a release.
 
-```bash
-git push origin main
-git push origin v0.2.0-rc.1
-```
+### 5. Verify the release
 
-This triggers the release workflow.
+Check the **Releases** page on GitHub. The release will include:
 
-### 6. Monitor the workflow
-
-Go to the repository's **Actions** tab on GitHub to watch the three jobs run:
-
-- **validate-version** -- Should pass in seconds
-- **build** -- Runs on `windows-latest` and `macos-latest` in parallel; builds the Tauri app and uploads artifacts
-- **publish-release** -- Creates the GitHub Release with all artifacts attached
-
-### 7. Verify the release
-
-Once the workflow completes, check the **Releases** page on GitHub. A pre-release tag (containing a hyphen like `0.2.0-rc.1`) will be marked as a pre-release automatically. The release will include:
-
+- Structured release notes grouped by commit type (Features, Bug Fixes, etc.)
 - macOS universal DMG (`.dmg`)
 - Windows MSI installer (`.msi`)
 - Windows NSIS installer (`.exe`)
-- Auto-generated changelog from commits since the previous tag
 
-## Pre-release vs Production Release
+## Forcing a Test Release
 
-| Aspect | Pre-release | Production |
-|---|---|---|
-| Tag format | `v1.0.0-rc.1`, `v1.0.0-beta.2` | `v1.0.0` |
-| GitHub label | Pre-release | Latest |
-| Detection | Tag contains a `-` | Tag has no `-` |
+To force a release for testing, create a commit with a release-triggering type:
 
-## Code Signing (Optional)
+```bash
+# This triggers a patch release
+git commit --allow-empty -m "fix: trigger test release"
+git push origin main
+```
 
-The release workflow supports code signing via repository secrets. Without these secrets the builds still succeed, but the binaries will be unsigned.
+For a pre-release on a different branch, add the branch to the `branches` array in `.releaserc.json`:
+
+```json
+{
+  "branches": [
+    "main",
+    { "name": "beta", "prerelease": true }
+  ]
+}
+```
+
+Then push to that branch to get pre-release versions like `1.1.0-beta.1`.
+
+## Manual Version Bump (Escape Hatch)
+
+If you ever need to manually set a version outside of semantic-release:
+
+```bash
+npm run version-bump 2.0.0
+git add package.json src-tauri/Cargo.toml src-tauri/tauri.conf.json
+git commit -m "chore(release): 2.0.0 [skip ci]"
+git tag v2.0.0
+git push origin main --tags
+```
+
+This bypasses semantic-release. Use sparingly.
+
+## Configuration
+
+### semantic-release (`.releaserc.json`)
+
+Controls version analysis, changelog generation, version bumping, and GitHub release creation. Plugins used:
+
+| Plugin | Purpose |
+|---|---|
+| `@semantic-release/commit-analyzer` | Determines version bump from commits |
+| `@semantic-release/release-notes-generator` | Generates structured release notes |
+| `@semantic-release/changelog` | Maintains `CHANGELOG.md` |
+| `@semantic-release/exec` | Runs `version-bump.mjs` to sync all version files |
+| `@semantic-release/git` | Commits version bump back to repo |
+| `@semantic-release/github` | Creates GitHub Release |
+
+### Code Signing (Optional)
+
+The build supports code signing via repository secrets. Without these secrets the builds still succeed unsigned.
 
 | Secret | Purpose |
 |---|---|
@@ -105,6 +133,8 @@ The release workflow supports code signing via repository secrets. Without these
 
 ## Notes
 
+- Releases are triggered **only** by merging to `main`. No manual tagging needed.
 - The release workflow does **not** build for Linux. Only Windows and macOS binaries are produced.
 - macOS builds target `universal-apple-darwin` (both Intel and Apple Silicon).
-- The CI workflow (`.github/workflows/ci.yml`) runs on pushes to `main` and all PRs, covering Ubuntu, Windows, and macOS. It does **not** produce release artifacts.
+- The CI workflow (`.github/workflows/ci.yml`) runs on pushes to `main` and all PRs. It enforces conventional commits on PRs but does **not** produce release artifacts.
+- The `[skip ci]` in the version bump commit message prevents the release workflow from re-triggering on its own commit.
