@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useEndpoints } from "../hooks/useEndpoints";
 import type { CameraEndpoint, ProtocolConfig, PtzProtocol } from "@shared/types";
-import { v4 as uuidv4 } from "uuid";
 
-// Simple UUID generator fallback (since we may not have uuid in frontend)
 function generateId(): string {
   return crypto.randomUUID?.() ?? Math.random().toString(36).slice(2);
 }

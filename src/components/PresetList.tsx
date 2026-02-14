@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { usePresets } from "../hooks/usePresets";
+import { usePtzControl } from "../hooks/usePtzControl";
 import { useAppStore } from "../store/app-store";
 import { PresetEditor } from "./PresetEditor";
 
@@ -10,7 +11,7 @@ export function PresetList() {
   const currentPosition = useAppStore((s) => s.currentPosition);
   const [showEditor, setShowEditor] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const { recallPreset } = require("../hooks/usePtzControl").usePtzControl();
+  const { recallPreset } = usePtzControl();
 
   const handlePresetClick = (presetId: string) => {
     setActivePresetId(presetId);
