@@ -126,11 +126,24 @@ export function useVideoFeed() {
 
       clearReconnectTimer();
       reconnectTimerRef.current = setInterval(async () => {
+        // Check if the source has changed since disconnect
+        const currentSource = useAppStore.getState().activeVideoSource;
+        if (!currentSource || currentSource.id !== source.id) {
+          clearReconnectTimer();
+          return;
+        }
         if (source.type === "local" && source.deviceId) {
           try {
             const stream = await navigator.mediaDevices.getUserMedia({
               video: { deviceId: { exact: source.deviceId } },
             });
+            // Re-check source hasn't changed during async getUserMedia
+            const latestSource = useAppStore.getState().activeVideoSource;
+            if (!latestSource || latestSource.id !== source.id) {
+              stream.getTracks().forEach((t) => t.stop());
+              clearReconnectTimer();
+              return;
+            }
             clearReconnectTimer();
             streamRef.current = stream;
             if (videoRef.current) {

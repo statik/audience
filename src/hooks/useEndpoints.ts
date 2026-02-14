@@ -24,14 +24,15 @@ export function useEndpoints() {
         const created = await invoke<CameraEndpoint>("create_endpoint", {
           endpoint,
         });
-        setEndpoints([...endpoints, created]);
+        const latest = useAppStore.getState().endpoints;
+        setEndpoints([...latest, created]);
         return created;
       } catch (err) {
         console.error("Failed to create endpoint:", err);
         throw err;
       }
     },
-    [endpoints, setEndpoints]
+    [setEndpoints]
   );
 
   const updateEndpoint = useCallback(
@@ -40,22 +41,24 @@ export function useEndpoints() {
         const updated = await invoke<CameraEndpoint>("update_endpoint", {
           endpoint,
         });
-        setEndpoints(endpoints.map((e) => (e.id === updated.id ? updated : e)));
+        const latest = useAppStore.getState().endpoints;
+        setEndpoints(latest.map((e) => (e.id === updated.id ? updated : e)));
         return updated;
       } catch (err) {
         console.error("Failed to update endpoint:", err);
         throw err;
       }
     },
-    [endpoints, setEndpoints]
+    [setEndpoints]
   );
 
   const deleteEndpoint = useCallback(
     async (endpointId: string) => {
       try {
         await invoke("delete_endpoint", { endpointId });
-        setEndpoints(endpoints.filter((e) => e.id !== endpointId));
-        if (activeEndpointId === endpointId) {
+        const latest = useAppStore.getState().endpoints;
+        setEndpoints(latest.filter((e) => e.id !== endpointId));
+        if (useAppStore.getState().activeEndpointId === endpointId) {
           setActiveEndpointId(null);
         }
       } catch (err) {
@@ -63,7 +66,7 @@ export function useEndpoints() {
         throw err;
       }
     },
-    [endpoints, setEndpoints, activeEndpointId, setActiveEndpointId]
+    [setEndpoints, setActiveEndpointId]
   );
 
   const setActiveEndpoint = useCallback(

@@ -21,12 +21,19 @@ pub async fn create_preset(
     zoom: f64,
     color: String,
 ) -> Result<Preset, String> {
+    if !pan.is_finite() || !tilt.is_finite() || !zoom.is_finite() {
+        return Err("Preset values must be finite numbers".to_string());
+    }
+    let name = name.chars().take(100).collect::<String>();
+    if name.trim().is_empty() {
+        return Err("Preset name cannot be empty".to_string());
+    }
     let preset = Preset {
         id: uuid::Uuid::new_v4().to_string(),
         name,
-        pan,
-        tilt,
-        zoom,
+        pan: pan.clamp(-1.0, 1.0),
+        tilt: tilt.clamp(-1.0, 1.0),
+        zoom: zoom.clamp(0.0, 1.0),
         color,
     };
     let mut profiles = state.profiles.lock().await;

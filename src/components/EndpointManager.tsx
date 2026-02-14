@@ -216,15 +216,18 @@ export function EndpointManager() {
                   <input
                     type="number"
                     value={editingEndpoint.config.port}
-                    onChange={(e) =>
-                      setEditingEndpoint({
-                        ...editingEndpoint,
-                        config: {
-                          ...editingEndpoint.config,
-                          port: parseInt(e.target.value),
-                        } as ProtocolConfig,
-                      })
-                    }
+                    onChange={(e) => {
+                      const parsed = parseInt(e.target.value, 10);
+                      if (!isNaN(parsed)) {
+                        setEditingEndpoint({
+                          ...editingEndpoint,
+                          config: {
+                            ...editingEndpoint.config,
+                            port: Math.max(1, Math.min(65535, parsed)),
+                          } as ProtocolConfig,
+                        });
+                      }
+                    }}
                     className="w-full px-2 py-1.5 text-sm bg-[var(--color-bg-dark)] border border-[var(--color-border)] rounded text-[var(--color-text)] focus:outline-none focus:border-[var(--color-primary)]"
                   />
                 </div>

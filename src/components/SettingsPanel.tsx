@@ -12,12 +12,15 @@ export function SettingsPanel() {
   );
 
   const updateSetting = async (key: string, value: number) => {
+    if (!Number.isFinite(value)) return;
+    const previousSettings = settings;
     const newSettings = { ...settings, [key]: value };
     setSettings(newSettings);
     try {
       await invoke("update_settings", { [key]: value });
     } catch (err) {
       console.error("Failed to save settings:", err);
+      setSettings(previousSettings);
     }
   };
 

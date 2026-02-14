@@ -66,9 +66,6 @@ impl ViscaClient {
         }
     }
 
-    fn next_seq(&self) -> u32 {
-        self.sequence.fetch_add(1, Ordering::SeqCst)
-    }
 }
 
 #[async_trait]
@@ -88,6 +85,11 @@ impl PtzController for ViscaClient {
     }
 
     async fn move_relative(&self, pan_delta: f64, tilt_delta: f64) -> Result<(), PtzError> {
+        // Short-circuit if both deltas are below threshold (nothing to move)
+        if pan_delta.abs() < 0.01 && tilt_delta.abs() < 0.01 {
+            return Ok(());
+        }
+
         // Determine direction and speed from delta magnitudes
         let pan_speed = ((pan_delta.abs() * 24.0).ceil() as u8).clamp(1, 24);
         let tilt_speed = ((tilt_delta.abs() * 23.0).ceil() as u8).clamp(1, 23);
@@ -159,7 +161,6 @@ impl PtzController for ViscaClient {
     async fn test_connection(&self) -> Result<(), PtzError> {
         self.ensure_connected().await?;
         // Send a position inquiry as a connectivity test
-        let _seq = self.next_seq();
         let cmd = commands::pan_tilt_position_inquiry();
         self.send_command(&cmd).await?;
         Ok(())

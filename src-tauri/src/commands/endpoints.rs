@@ -1,5 +1,15 @@
-use crate::ptz::types::{CameraEndpoint, ProtocolConfig};
+use crate::ptz::types::{validate_host, CameraEndpoint, ProtocolConfig};
 use crate::AppState;
+
+/// Validate the host field in a protocol config before persisting.
+fn validate_endpoint_config(config: &ProtocolConfig) -> Result<(), String> {
+    match config {
+        ProtocolConfig::Ndi => Ok(()),
+        ProtocolConfig::Visca { host, .. }
+        | ProtocolConfig::PanasonicAw { host, .. }
+        | ProtocolConfig::BirdDogRest { host, .. } => validate_host(host),
+    }
+}
 
 /// Get all configured camera endpoints.
 #[tauri::command]
@@ -16,6 +26,7 @@ pub async fn create_endpoint(
     state: tauri::State<'_, AppState>,
     endpoint: CameraEndpoint,
 ) -> Result<CameraEndpoint, String> {
+    validate_endpoint_config(&endpoint.config)?;
     let mut endpoints = state.endpoints.lock().await;
     endpoints.create(endpoint)
 }
@@ -26,6 +37,7 @@ pub async fn update_endpoint(
     state: tauri::State<'_, AppState>,
     endpoint: CameraEndpoint,
 ) -> Result<CameraEndpoint, String> {
+    validate_endpoint_config(&endpoint.config)?;
     let mut endpoints = state.endpoints.lock().await;
     endpoints.update(endpoint)
 }
@@ -41,6 +53,7 @@ pub async fn delete_endpoint(
     if active_id.as_deref() == Some(&endpoint_id) {
         let mut dispatcher = state.ptz_dispatcher.lock().await;
         dispatcher.clear_controller();
+        drop(dispatcher);
         *state.active_endpoint_id.lock().await = None;
     }
 

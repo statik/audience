@@ -89,7 +89,7 @@ pub async fn start_server(
     let (shutdown_tx, mut shutdown_rx) = tokio::sync::watch::channel(false);
 
     tokio::spawn(async move {
-        axum::serve(listener, app)
+        if let Err(e) = axum::serve(listener, app)
             .with_graceful_shutdown(async move {
                 // Wait until shutdown signal is received
                 while !*shutdown_rx.borrow_and_update() {
@@ -99,7 +99,9 @@ pub async fn start_server(
                 }
             })
             .await
-            .expect("MJPEG server error");
+        {
+            log::error!("MJPEG server error on port {}: {}", port, e);
+        }
         log::info!("MJPEG server on port {} shut down", port);
     });
 

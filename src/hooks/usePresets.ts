@@ -26,7 +26,8 @@ export function usePresets() {
 
   const createPreset = useCallback(
     async (name: string, pan: number, tilt: number, zoom: number) => {
-      const color = PRESET_COLORS[presets.length % PRESET_COLORS.length];
+      const currentPresets = useAppStore.getState().presets;
+      const color = PRESET_COLORS[currentPresets.length % PRESET_COLORS.length];
       try {
         const preset = await invoke<Preset>("create_preset", {
           name,
@@ -35,36 +36,39 @@ export function usePresets() {
           zoom,
           color,
         });
-        setPresets([...presets, preset]);
+        const latest = useAppStore.getState().presets;
+        setPresets([...latest, preset]);
         return preset;
       } catch (err) {
         console.error("Failed to create preset:", err);
         throw err;
       }
     },
-    [presets, setPresets]
+    [setPresets]
   );
 
   const updatePreset = useCallback(
     async (preset: Preset) => {
       try {
         const updated = await invoke<Preset>("update_preset", { preset });
-        setPresets(presets.map((p) => (p.id === updated.id ? updated : p)));
+        const latest = useAppStore.getState().presets;
+        setPresets(latest.map((p) => (p.id === updated.id ? updated : p)));
         return updated;
       } catch (err) {
         console.error("Failed to update preset:", err);
         throw err;
       }
     },
-    [presets, setPresets]
+    [setPresets]
   );
 
   const deletePreset = useCallback(
     async (presetId: string) => {
       try {
         await invoke("delete_preset", { presetId });
-        setPresets(presets.filter((p) => p.id !== presetId));
-        if (activePresetId === presetId) {
+        const latest = useAppStore.getState().presets;
+        setPresets(latest.filter((p) => p.id !== presetId));
+        if (useAppStore.getState().activePresetId === presetId) {
           setActivePresetId(null);
         }
       } catch (err) {
@@ -72,7 +76,7 @@ export function usePresets() {
         throw err;
       }
     },
-    [presets, setPresets, activePresetId, setActivePresetId]
+    [setPresets, setActivePresetId]
   );
 
   return {

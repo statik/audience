@@ -20,14 +20,13 @@ impl PanasonicClient {
     }
 
     async fn send_ptz_command(&self, cmd: &str) -> Result<String, PtzError> {
-        let url = format!(
-            "{}/cgi-bin/aw_ptz?cmd=%23{}&res=1",
-            self.base_url, cmd
-        );
+        let url = format!("{}/cgi-bin/aw_ptz", self.base_url);
+        let cmd_with_prefix = format!("#{}", cmd);
 
         let response = self
             .client
             .get(&url)
+            .query(&[("cmd", &cmd_with_prefix), ("res", &"1".to_string())])
             .timeout(std::time::Duration::from_secs(5))
             .send()
             .await
@@ -70,12 +69,14 @@ impl PanasonicClient {
         if delta.abs() < 0.01 {
             "50".to_string()
         } else {
+            // Map delta to speed where 50=stop, >50=one direction, <50=opposite.
+            // Use ranges 51-99 and 1-49 to avoid the stop value (50).
             let speed = if delta > 0.0 {
-                50.0 + delta.abs() * 49.0
+                51.0 + delta.abs() * 48.0
             } else {
-                50.0 - delta.abs() * 49.0
+                49.0 - delta.abs() * 48.0
             };
-            format!("{:02}", speed.clamp(1.0, 99.0) as u8)
+            format!("{:02}", speed.round().clamp(1.0, 99.0) as u8)
         }
     }
 }
