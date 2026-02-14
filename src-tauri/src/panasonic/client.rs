@@ -11,8 +11,7 @@ pub struct PanasonicClient {
 
 impl PanasonicClient {
     pub fn new(host: &str, port: u16) -> Result<Self, PtzError> {
-        crate::ptz::types::validate_host(host)
-            .map_err(PtzError::ConnectionFailed)?;
+        crate::ptz::types::validate_host(host).map_err(PtzError::ConnectionFailed)?;
         Ok(Self {
             base_url: format!("http://{}:{}", host, port),
             client: reqwest::Client::new(),

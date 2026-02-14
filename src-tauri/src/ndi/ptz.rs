@@ -15,44 +15,30 @@ impl NdiPtzController {
 #[async_trait]
 impl PtzController for NdiPtzController {
     async fn move_absolute(&self, _pan: f64, _tilt: f64, _zoom: f64) -> Result<(), PtzError> {
-        Err(PtzError::ConnectionFailed(
-            "NDI SDK not linked".to_string(),
-        ))
+        Err(PtzError::ConnectionFailed("NDI SDK not linked".to_string()))
     }
 
     async fn move_relative(&self, _pan_delta: f64, _tilt_delta: f64) -> Result<(), PtzError> {
-        Err(PtzError::ConnectionFailed(
-            "NDI SDK not linked".to_string(),
-        ))
+        Err(PtzError::ConnectionFailed("NDI SDK not linked".to_string()))
     }
 
     async fn zoom_to(&self, _zoom: f64) -> Result<(), PtzError> {
-        Err(PtzError::ConnectionFailed(
-            "NDI SDK not linked".to_string(),
-        ))
+        Err(PtzError::ConnectionFailed("NDI SDK not linked".to_string()))
     }
 
     async fn recall_preset(&self, _preset_index: u8) -> Result<(), PtzError> {
-        Err(PtzError::ConnectionFailed(
-            "NDI SDK not linked".to_string(),
-        ))
+        Err(PtzError::ConnectionFailed("NDI SDK not linked".to_string()))
     }
 
     async fn store_preset(&self, _preset_index: u8) -> Result<(), PtzError> {
-        Err(PtzError::ConnectionFailed(
-            "NDI SDK not linked".to_string(),
-        ))
+        Err(PtzError::ConnectionFailed("NDI SDK not linked".to_string()))
     }
 
     async fn get_position(&self) -> Result<PtzPosition, PtzError> {
-        Err(PtzError::ConnectionFailed(
-            "NDI SDK not linked".to_string(),
-        ))
+        Err(PtzError::ConnectionFailed("NDI SDK not linked".to_string()))
     }
 
     async fn test_connection(&self) -> Result<(), PtzError> {
-        Err(PtzError::ConnectionFailed(
-            "NDI SDK not linked".to_string(),
-        ))
+        Err(PtzError::ConnectionFailed("NDI SDK not linked".to_string()))
     }
 }

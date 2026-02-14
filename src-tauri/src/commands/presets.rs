@@ -3,9 +3,7 @@ use crate::AppState;
 
 /// Get all presets from the active profile.
 #[tauri::command]
-pub async fn get_all_presets(
-    state: tauri::State<'_, AppState>,
-) -> Result<Vec<Preset>, String> {
+pub async fn get_all_presets(state: tauri::State<'_, AppState>) -> Result<Vec<Preset>, String> {
     let mut profiles = state.profiles.lock().await;
     profiles.ensure_default_profile()?;
     Ok(profiles.get_presets())
@@ -78,9 +76,7 @@ pub async fn delete_preset(
 
 /// Get all profiles.
 #[tauri::command]
-pub async fn get_profiles(
-    state: tauri::State<'_, AppState>,
-) -> Result<Vec<PresetProfile>, String> {
+pub async fn get_profiles(state: tauri::State<'_, AppState>) -> Result<Vec<PresetProfile>, String> {
     let profiles = state.profiles.lock().await;
     Ok(profiles.get_profiles())
 }

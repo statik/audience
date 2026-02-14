@@ -27,9 +27,7 @@ pub async fn list_local_devices() -> Result<Vec<LocalDevice>, String> {
 /// Start the MJPEG stream server for NDI or fallback capture sources.
 /// Returns the port number of the localhost MJPEG server.
 #[tauri::command]
-pub async fn start_mjpeg_stream(
-    state: tauri::State<'_, AppState>,
-) -> Result<u16, String> {
+pub async fn start_mjpeg_stream(state: tauri::State<'_, AppState>) -> Result<u16, String> {
     use crate::video::mjpeg_server;
     use std::sync::Arc;
 
@@ -48,9 +46,7 @@ pub async fn start_mjpeg_stream(
 
 /// Stop the MJPEG stream server.
 #[tauri::command]
-pub async fn stop_mjpeg_stream(
-    state: tauri::State<'_, AppState>,
-) -> Result<(), String> {
+pub async fn stop_mjpeg_stream(state: tauri::State<'_, AppState>) -> Result<(), String> {
     // Send shutdown signal to the server task
     if let Some(shutdown_tx) = state.mjpeg_shutdown.lock().await.take() {
         let _ = shutdown_tx.send(true);
@@ -61,8 +57,6 @@ pub async fn stop_mjpeg_stream(
 
 /// Get the current MJPEG server port, if running.
 #[tauri::command]
-pub async fn get_mjpeg_port(
-    state: tauri::State<'_, AppState>,
-) -> Result<Option<u16>, String> {
+pub async fn get_mjpeg_port(state: tauri::State<'_, AppState>) -> Result<Option<u16>, String> {
     Ok(*state.mjpeg_port.lock().await)
 }

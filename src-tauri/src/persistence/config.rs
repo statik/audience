@@ -122,7 +122,9 @@ mod tests {
 
     #[test]
     fn video_source_config_local_roundtrips() {
-        let source = VideoSourceConfig::Local { device_id: "dev-0".to_string() };
+        let source = VideoSourceConfig::Local {
+            device_id: "dev-0".to_string(),
+        };
         let json = serde_json::to_string(&source).unwrap();
         let decoded: VideoSourceConfig = serde_json::from_str(&json).unwrap();
         match decoded {
@@ -133,7 +135,9 @@ mod tests {
 
     #[test]
     fn video_source_config_ndi_roundtrips() {
-        let source = VideoSourceConfig::Ndi { source_name: "Camera 1".to_string() };
+        let source = VideoSourceConfig::Ndi {
+            source_name: "Camera 1".to_string(),
+        };
         let json = serde_json::to_string(&source).unwrap();
         let decoded: VideoSourceConfig = serde_json::from_str(&json).unwrap();
         match decoded {

@@ -110,18 +110,14 @@ impl ProfileStore {
     }
 
     pub fn create_preset(&mut self, preset: Preset) -> Result<Preset, String> {
-        let profile = self
-            .get_active_profile_mut()
-            .ok_or("No active profile")?;
+        let profile = self.get_active_profile_mut().ok_or("No active profile")?;
         profile.presets.push(preset.clone());
         self.save()?;
         Ok(preset)
     }
 
     pub fn update_preset(&mut self, preset: Preset) -> Result<Preset, String> {
-        let profile = self
-            .get_active_profile_mut()
-            .ok_or("No active profile")?;
+        let profile = self.get_active_profile_mut().ok_or("No active profile")?;
         let pos = profile
             .presets
             .iter()
@@ -133,9 +129,7 @@ impl ProfileStore {
     }
 
     pub fn delete_preset(&mut self, preset_id: &str) -> Result<(), String> {
-        let profile = self
-            .get_active_profile_mut()
-            .ok_or("No active profile")?;
+        let profile = self.get_active_profile_mut().ok_or("No active profile")?;
         let pos = profile
             .presets
             .iter()
@@ -172,7 +166,8 @@ mod tests {
     use std::fs;
 
     fn temp_dir() -> std::path::PathBuf {
-        let dir = std::env::temp_dir().join(format!("ptzcam-test-profiles-{}", uuid::Uuid::new_v4()));
+        let dir =
+            std::env::temp_dir().join(format!("ptzcam-test-profiles-{}", uuid::Uuid::new_v4()));
         fs::create_dir_all(&dir).unwrap();
         dir
     }
@@ -389,8 +384,12 @@ mod tests {
         let dir = temp_dir();
         {
             let mut store = ProfileStore::load_or_default(&dir);
-            store.create_profile(make_profile("p1", "Persisted")).unwrap();
-            store.create_preset(make_preset("pr1", "Saved Preset")).unwrap();
+            store
+                .create_profile(make_profile("p1", "Persisted"))
+                .unwrap();
+            store
+                .create_preset(make_preset("pr1", "Saved Preset"))
+                .unwrap();
         }
 
         let store = ProfileStore::load_or_default(&dir);
@@ -405,7 +404,9 @@ mod tests {
     fn save_profile_updates_existing_or_creates_new() {
         let dir = temp_dir();
         let mut store = ProfileStore::load_or_default(&dir);
-        store.create_profile(make_profile("p1", "Original")).unwrap();
+        store
+            .create_profile(make_profile("p1", "Original"))
+            .unwrap();
 
         // Update existing
         let mut updated = make_profile("p1", "Updated");

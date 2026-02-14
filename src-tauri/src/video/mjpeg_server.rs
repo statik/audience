@@ -1,10 +1,4 @@
-use axum::{
-    body::Body,
-    http::header,
-    response::Response,
-    routing::get,
-    Router,
-};
+use axum::{body::Body, http::header, response::Response, routing::get, Router};
 use std::sync::Arc;
 use tokio::sync::broadcast;
 
@@ -31,9 +25,7 @@ impl MjpegState {
 }
 
 /// Handle for the MJPEG stream endpoint.
-async fn stream_handler(
-    state: axum::extract::State<Arc<MjpegState>>,
-) -> Response<Body> {
+async fn stream_handler(state: axum::extract::State<Arc<MjpegState>>) -> Response<Body> {
     let mut receiver = state.frame_sender.subscribe();
 
     let stream = async_stream::stream! {

@@ -130,7 +130,11 @@ mod tests {
 
     #[test]
     fn ptz_position_serializes_to_json() {
-        let pos = PtzPosition { pan: 0.5, tilt: -0.3, zoom: 0.8 };
+        let pos = PtzPosition {
+            pan: 0.5,
+            tilt: -0.3,
+            zoom: 0.8,
+        };
         let json = serde_json::to_string(&pos).unwrap();
         assert!(json.contains("0.5"));
         assert!(json.contains("-0.3"));
@@ -150,7 +154,11 @@ mod tests {
 
     #[test]
     fn ptz_command_move_absolute_roundtrips() {
-        let cmd = PtzCommand::MoveAbsolute { pan: 0.1, tilt: 0.2, zoom: 0.3 };
+        let cmd = PtzCommand::MoveAbsolute {
+            pan: 0.1,
+            tilt: 0.2,
+            zoom: 0.3,
+        };
         let json = serde_json::to_string(&cmd).unwrap();
         let decoded: PtzCommand = serde_json::from_str(&json).unwrap();
         match decoded {
@@ -213,7 +221,12 @@ mod tests {
         let json = serde_json::to_string(&config).unwrap();
         let decoded: ProtocolConfig = serde_json::from_str(&json).unwrap();
         match decoded {
-            ProtocolConfig::PanasonicAw { host, port, username, password } => {
+            ProtocolConfig::PanasonicAw {
+                host,
+                port,
+                username,
+                password,
+            } => {
                 assert_eq!(host, "10.0.0.1");
                 assert_eq!(port, 80);
                 assert_eq!(username.as_deref(), Some("admin"));
@@ -321,16 +334,14 @@ mod tests {
             name: "Sunday Service".to_string(),
             camera_fov_degrees: 60.0,
             endpoint_id: Some("ep-1".to_string()),
-            presets: vec![
-                Preset {
-                    id: "p1".to_string(),
-                    name: "Wide".to_string(),
-                    pan: 0.0,
-                    tilt: 0.0,
-                    zoom: 0.0,
-                    color: "#fff".to_string(),
-                },
-            ],
+            presets: vec![Preset {
+                id: "p1".to_string(),
+                name: "Wide".to_string(),
+                pan: 0.0,
+                tilt: 0.0,
+                zoom: 0.0,
+                color: "#fff".to_string(),
+            }],
         };
         let json = serde_json::to_string(&profile).unwrap();
         let decoded: PresetProfile = serde_json::from_str(&json).unwrap();
