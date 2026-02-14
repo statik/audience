@@ -67,9 +67,10 @@ pub async fn test_endpoint_connection(
             Ok("NDI connection test: NDI SDK not linked".to_string())
         }
         ProtocolConfig::Visca { host, port } => {
-            use crate::visca::client::ViscaClient;
             use crate::ptz::controller::PtzController;
-            let client = ViscaClient::new(&host, port);
+            use crate::visca::client::ViscaClient;
+            let client = ViscaClient::new(&host, port)
+                .map_err(|e| format!("VISCA init failed: {}", e))?;
             match client.test_connection().await {
                 Ok(()) => Ok("VISCA connection successful".to_string()),
                 Err(e) => Err(format!("VISCA connection failed: {}", e)),
@@ -78,7 +79,8 @@ pub async fn test_endpoint_connection(
         ProtocolConfig::PanasonicAw { host, port, .. } => {
             use crate::panasonic::client::PanasonicClient;
             use crate::ptz::controller::PtzController;
-            let client = PanasonicClient::new(&host, port);
+            let client = PanasonicClient::new(&host, port)
+                .map_err(|e| format!("Panasonic init failed: {}", e))?;
             match client.test_connection().await {
                 Ok(()) => Ok("Panasonic AW connection successful".to_string()),
                 Err(e) => Err(format!("Panasonic AW connection failed: {}", e)),
@@ -87,7 +89,8 @@ pub async fn test_endpoint_connection(
         ProtocolConfig::BirdDogRest { host, port } => {
             use crate::birddog::client::BirdDogClient;
             use crate::ptz::controller::PtzController;
-            let client = BirdDogClient::new(&host, port);
+            let client = BirdDogClient::new(&host, port)
+                .map_err(|e| format!("BirdDog init failed: {}", e))?;
             match client.test_connection().await {
                 Ok(()) => Ok("BirdDog connection successful".to_string()),
                 Err(e) => Err(format!("BirdDog connection failed: {}", e)),

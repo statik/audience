@@ -1,13 +1,13 @@
-import { type RefObject } from "react";
 import { useAppStore } from "../store/app-store";
 import { usePtzControl } from "../hooks/usePtzControl";
 import { calculateOverlayRect } from "../utils/overlay-geometry";
 
 interface PresetOverlayProps {
-  canvasRef: RefObject<HTMLCanvasElement | null>;
+  canvasWidth: number;
+  canvasHeight: number;
 }
 
-export function PresetOverlay({ canvasRef }: PresetOverlayProps) {
+export function PresetOverlay({ canvasWidth, canvasHeight }: PresetOverlayProps) {
   const presets = useAppStore((s) => s.presets);
   const activePresetId = useAppStore((s) => s.activePresetId);
   const currentPosition = useAppStore((s) => s.currentPosition);
@@ -15,9 +15,6 @@ export function PresetOverlay({ canvasRef }: PresetOverlayProps) {
   const mode = useAppStore((s) => s.mode);
   const { recallPreset } = usePtzControl();
   const setActivePresetId = useAppStore((s) => s.setActivePresetId);
-
-  const canvasWidth = canvasRef.current?.width || 800;
-  const canvasHeight = canvasRef.current?.height || 450;
 
   const handlePresetClick = (presetId: string) => {
     if (mode === "operation") {

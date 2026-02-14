@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAppStore } from "../store/app-store";
 import { useVideoFeed } from "../hooks/useVideoFeed";
 import type { VideoSource } from "@shared/types";
@@ -10,10 +10,10 @@ export function SourcePicker() {
   const setActiveVideoSource = useAppStore((s) => s.setActiveVideoSource);
   const { enumerateDevices } = useVideoFeed();
   const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const refreshSources = useCallback(async () => {
     const localDevices = await enumerateDevices();
-    // NDI sources would come from backend invoke
     setVideoSources(localDevices);
   }, [enumerateDevices, setVideoSources]);
 
@@ -21,13 +21,25 @@ export function SourcePicker() {
     refreshSources();
   }, [refreshSources]);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
   const selectSource = (source: VideoSource) => {
     setActiveVideoSource(source);
     setIsOpen(false);
   };
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef}>
       <button
         className="flex items-center gap-2 px-3 py-1.5 text-sm rounded border border-[var(--color-border)] bg-[var(--color-bg-dark)] text-[var(--color-text)] hover:border-[var(--color-primary)] transition-colors"
         onClick={() => {

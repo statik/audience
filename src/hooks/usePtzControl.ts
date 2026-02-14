@@ -7,7 +7,6 @@ const MIN_COMMAND_INTERVAL_MS = 100;
 
 export function usePtzControl() {
   const settings = useAppStore((s) => s.settings);
-  const currentPosition = useAppStore((s) => s.currentPosition);
   const setCurrentPosition = useAppStore((s) => s.setCurrentPosition);
   const lastCommandTime = useRef(0);
 
@@ -28,16 +27,18 @@ export function usePtzControl() {
           panDelta,
           tiltDelta,
         });
+        // Read current state at call time to avoid stale closures
+        const pos = useAppStore.getState().currentPosition;
         setCurrentPosition({
-          ...currentPosition,
-          pan: Math.max(-1, Math.min(1, currentPosition.pan + panDelta)),
-          tilt: Math.max(-1, Math.min(1, currentPosition.tilt + tiltDelta)),
+          pan: Math.max(-1, Math.min(1, pos.pan + panDelta)),
+          tilt: Math.max(-1, Math.min(1, pos.tilt + tiltDelta)),
+          zoom: pos.zoom,
         });
       } catch (err) {
         console.error("PTZ move failed:", err);
       }
     },
-    [throttle, currentPosition, setCurrentPosition]
+    [throttle, setCurrentPosition]
   );
 
   const moveAbsolute = useCallback(
@@ -58,12 +59,13 @@ export function usePtzControl() {
       if (!throttle()) return;
       try {
         await invoke("ptz_zoom", { zoom: zoomLevel });
-        setCurrentPosition({ ...currentPosition, zoom: zoomLevel });
+        const pos = useAppStore.getState().currentPosition;
+        setCurrentPosition({ ...pos, zoom: zoomLevel });
       } catch (err) {
         console.error("PTZ zoom failed:", err);
       }
     },
-    [throttle, currentPosition, setCurrentPosition]
+    [throttle, setCurrentPosition]
   );
 
   const recallPreset = useCallback(
@@ -82,30 +84,39 @@ export function usePtzControl() {
   /** Handle a click on the video canvas to adjust pan/tilt. */
   const handleVideoClick = useCallback(
     (clickX: number, clickY: number, canvasWidth: number, canvasHeight: number) => {
+      const pos = useAppStore.getState().currentPosition;
       const centerX = canvasWidth / 2;
       const centerY = canvasHeight / 2;
-      const deltaX = (clickX - centerX) / centerX; // -1 to +1
-      const deltaY = (centerY - clickY) / centerY; // -1 to +1 (inverted Y)
+      const deltaX = (clickX - centerX) / centerX;
+      const deltaY = (centerY - clickY) / centerY;
 
-      const zoomFactor = currentPosition.zoom > 0 ? 1 / (1 + currentPosition.zoom * 4) : 1;
+      const zoomFactor = pos.zoom > 0 ? 1 / (1 + pos.zoom * 4) : 1;
       const panAdjustment = deltaX * settings.click_sensitivity * zoomFactor;
       const tiltAdjustment = deltaY * settings.click_sensitivity * zoomFactor;
 
       moveRelative(panAdjustment, tiltAdjustment);
     },
-    [currentPosition, settings.click_sensitivity, moveRelative]
+    [settings.click_sensitivity, moveRelative]
   );
 
   /** Handle scroll on the video canvas to adjust zoom. */
   const handleVideoScroll = useCallback(
     (deltaY: number) => {
       if (!throttle()) return;
+      const pos = useAppStore.getState().currentPosition;
       const zoomDelta = -deltaY * settings.scroll_sensitivity * 0.01;
-      const newZoom = Math.max(0, Math.min(1, currentPosition.zoom + zoomDelta));
-      zoom(newZoom);
+      const newZoom = Math.max(0, Math.min(1, pos.zoom + zoomDelta));
+      // Set position directly to avoid double-throttle from calling zoom()
+      invoke("ptz_zoom", { zoom: newZoom }).catch((err: unknown) =>
+        console.error("PTZ zoom failed:", err)
+      );
+      setCurrentPosition({ ...pos, zoom: newZoom });
     },
-    [throttle, settings.scroll_sensitivity, currentPosition.zoom, zoom]
+    [throttle, settings.scroll_sensitivity, setCurrentPosition]
   );
+
+  // Read currentPosition from store for components that need it reactively
+  const currentPosition = useAppStore((s) => s.currentPosition);
 
   return {
     currentPosition,

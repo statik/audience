@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useVideoFeed } from "../hooks/useVideoFeed";
 import { usePtzControl } from "../hooks/usePtzControl";
 import { useAppStore } from "../store/app-store";
@@ -11,8 +11,9 @@ export function VideoCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mode = useAppStore((s) => s.mode);
   const isConnected = useAppStore((s) => s.isConnected);
+  const [canvasDimensions, setCanvasDimensions] = useState({ width: 800, height: 450 });
 
-  // Sync canvas size to container
+  // Sync canvas size to container and track dimensions in state
   useEffect(() => {
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
@@ -21,6 +22,7 @@ export function VideoCanvas() {
           canvasRef.current.width = width;
           canvasRef.current.height = height;
         }
+        setCanvasDimensions({ width, height });
       }
     });
 
@@ -90,7 +92,10 @@ export function VideoCanvas() {
       />
 
       {/* Preset overlays rendered as HTML elements */}
-      <PresetOverlay canvasRef={canvasRef} />
+      <PresetOverlay
+        canvasWidth={canvasDimensions.width}
+        canvasHeight={canvasDimensions.height}
+      />
     </div>
   );
 }

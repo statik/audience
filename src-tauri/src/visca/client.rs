@@ -16,13 +16,15 @@ pub struct ViscaClient {
 }
 
 impl ViscaClient {
-    pub fn new(host: &str, port: u16) -> Self {
-        Self {
+    pub fn new(host: &str, port: u16) -> Result<Self, PtzError> {
+        crate::ptz::types::validate_host(host)
+            .map_err(PtzError::ConnectionFailed)?;
+        Ok(Self {
             socket: Mutex::new(None),
             host: host.to_string(),
             port,
             sequence: AtomicU32::new(1),
-        }
+        })
     }
 
     async fn ensure_connected(&self) -> Result<(), PtzError> {

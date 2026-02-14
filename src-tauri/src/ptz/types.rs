@@ -85,6 +85,25 @@ pub struct Preset {
     pub color: String,
 }
 
+/// Validate that a host string is a safe IP address or hostname.
+/// Rejects values containing path separators, whitespace, or other injection-prone characters.
+pub fn validate_host(host: &str) -> Result<(), String> {
+    if host.is_empty() {
+        return Err("Host cannot be empty".to_string());
+    }
+    if host.contains('/') || host.contains('\\') || host.contains(' ') || host.contains('@') {
+        return Err(format!("Invalid host: '{}'", host));
+    }
+    // Must look like an IP address or hostname
+    let valid = host
+        .chars()
+        .all(|c| c.is_alphanumeric() || c == '.' || c == ':' || c == '-');
+    if !valid {
+        return Err(format!("Invalid host characters: '{}'", host));
+    }
+    Ok(())
+}
+
 /// A named collection of presets for a particular camera setup.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PresetProfile {

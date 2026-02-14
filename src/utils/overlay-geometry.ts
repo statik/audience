@@ -50,7 +50,8 @@ export function calculateOverlayRect(
 
   // Preset FOV relative to current FOV determines overlay size
   const relativeWidth = presetFov / currentFov;
-  const relativeHeight = relativeWidth / aspectRatio * aspectRatio;
+  // Height is derived from width divided by aspect ratio (wider canvas = shorter overlay)
+  const relativeHeight = relativeWidth / aspectRatio;
 
   // Convert to canvas pixels
   const centerX = canvasWidth / 2;
