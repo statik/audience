@@ -28,7 +28,7 @@ Releases are fully automated via [semantic-release](https://semantic-release.git
 
 ### 1. Write your changes using conventional commits
 
-All commits must follow [Conventional Commits](https://www.conventionalcommits.org/) format. This is enforced by commitlint locally (via husky git hook) and in CI (on pull requests).
+All commits must follow [Conventional Commits](https://www.conventionalcommits.org/) format. This is enforced by commitlint locally (via prek git hook) and in CI (on pull requests).
 
 ```bash
 git commit -m "feat: add camera group selection"

@@ -1,0 +1,20 @@
+#:schema: https://www.schemastore.org/prek.json
+
+[[repos]]
+repo = "builtin"
+hooks = [
+    { id = "trailing-whitespace" },
+    { id = "end-of-file-fixer" },
+    { id = "check-added-large-files" },
+]
+
+[[repos]]
+repo = "local"
+
+[[repos.hooks]]
+id = "commitlint"
+name = "Commitlint"
+language = "system"
+entry = "npx commitlint --edit"
+stages = ["commit-msg"]
+pass_filenames = false
