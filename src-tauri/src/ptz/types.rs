@@ -1,21 +1,11 @@
 use serde::{Deserialize, Serialize};
 
 /// Normalized PTZ position: pan/tilt in [-1.0, 1.0], zoom in [0.0, 1.0].
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PtzPosition {
     pub pan: f64,
     pub tilt: f64,
     pub zoom: f64,
-}
-
-impl Default for PtzPosition {
-    fn default() -> Self {
-        Self {
-            pan: 0.0,
-            tilt: 0.0,
-            zoom: 0.0,
-        }
-    }
 }
 
 /// A PTZ command to send to a camera.

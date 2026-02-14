@@ -2,17 +2,9 @@ use super::types::CameraEndpoint;
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 struct EndpointStore {
     endpoints: Vec<CameraEndpoint>,
-}
-
-impl Default for EndpointStore {
-    fn default() -> Self {
-        Self {
-            endpoints: Vec::new(),
-        }
-    }
 }
 
 /// Manages CRUD operations and persistence for camera endpoints.

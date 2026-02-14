@@ -2,19 +2,10 @@ use crate::ptz::types::{Preset, PresetProfile};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 struct ProfileData {
     profiles: Vec<PresetProfile>,
     active_profile_id: Option<String>,
-}
-
-impl Default for ProfileData {
-    fn default() -> Self {
-        Self {
-            profiles: Vec::new(),
-            active_profile_id: None,
-        }
-    }
 }
 
 /// Manages preset profiles and their persistence.
