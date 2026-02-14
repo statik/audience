@@ -33,10 +33,16 @@ pub async fn start_mjpeg_stream(
     use crate::video::mjpeg_server;
     use std::sync::Arc;
 
+    // Stop any existing server first
+    if let Some(shutdown_tx) = state.mjpeg_shutdown.lock().await.take() {
+        let _ = shutdown_tx.send(true);
+    }
+
     let mjpeg_state = Arc::new(mjpeg_server::MjpegState::new());
-    let port = mjpeg_server::start_server(mjpeg_state).await?;
+    let (port, shutdown_tx) = mjpeg_server::start_server(mjpeg_state).await?;
 
     *state.mjpeg_port.lock().await = Some(port);
+    *state.mjpeg_shutdown.lock().await = Some(shutdown_tx);
     Ok(port)
 }
 
@@ -45,8 +51,11 @@ pub async fn start_mjpeg_stream(
 pub async fn stop_mjpeg_stream(
     state: tauri::State<'_, AppState>,
 ) -> Result<(), String> {
+    // Send shutdown signal to the server task
+    if let Some(shutdown_tx) = state.mjpeg_shutdown.lock().await.take() {
+        let _ = shutdown_tx.send(true);
+    }
     *state.mjpeg_port.lock().await = None;
-    // The server task will stop when all references are dropped
     Ok(())
 }
 

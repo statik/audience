@@ -11,6 +11,7 @@ pub mod visca;
 
 use persistence::config::AppConfig;
 use persistence::profiles::ProfileStore;
+use ptz::controller::PtzDispatcher;
 use ptz::endpoint_manager::EndpointManager;
 use ptz::types::PtzPosition;
 use std::sync::Arc;
@@ -23,7 +24,9 @@ pub struct AppState {
     pub endpoints: Arc<Mutex<EndpointManager>>,
     pub current_position: Arc<Mutex<PtzPosition>>,
     pub active_endpoint_id: Arc<Mutex<Option<String>>>,
+    pub ptz_dispatcher: Arc<Mutex<PtzDispatcher>>,
     pub mjpeg_port: Arc<Mutex<Option<u16>>>,
+    pub mjpeg_shutdown: Arc<Mutex<Option<tokio::sync::watch::Sender<bool>>>>,
 }
 
 impl AppState {
@@ -38,7 +41,9 @@ impl AppState {
             endpoints: Arc::new(Mutex::new(endpoints)),
             current_position: Arc::new(Mutex::new(PtzPosition::default())),
             active_endpoint_id: Arc::new(Mutex::new(None)),
+            ptz_dispatcher: Arc::new(Mutex::new(PtzDispatcher::new())),
             mjpeg_port: Arc::new(Mutex::new(None)),
+            mjpeg_shutdown: Arc::new(Mutex::new(None)),
         }
     }
 }

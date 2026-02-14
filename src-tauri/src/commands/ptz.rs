@@ -8,11 +8,21 @@ pub async fn ptz_move_relative(
     pan_delta: f64,
     tilt_delta: f64,
 ) -> Result<(), String> {
+    // Update local position tracking
     let mut pos = state.current_position.lock().await;
     pos.pan = (pos.pan + pan_delta).clamp(-1.0, 1.0);
     pos.tilt = (pos.tilt + tilt_delta).clamp(-1.0, 1.0);
-    // In production: dispatch to active PTZ controller
-    log::info!("PTZ move relative: pan_delta={}, tilt_delta={}", pan_delta, tilt_delta);
+    drop(pos);
+
+    // Dispatch to active PTZ controller if connected
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher
+            .move_relative(pan_delta, tilt_delta)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+
     Ok(())
 }
 
@@ -24,11 +34,26 @@ pub async fn ptz_move_absolute(
     tilt: f64,
     zoom: f64,
 ) -> Result<(), String> {
+    let pan = pan.clamp(-1.0, 1.0);
+    let tilt = tilt.clamp(-1.0, 1.0);
+    let zoom = zoom.clamp(0.0, 1.0);
+
+    // Update local position tracking
     let mut pos = state.current_position.lock().await;
-    pos.pan = pan.clamp(-1.0, 1.0);
-    pos.tilt = tilt.clamp(-1.0, 1.0);
-    pos.zoom = zoom.clamp(0.0, 1.0);
-    log::info!("PTZ move absolute: pan={}, tilt={}, zoom={}", pan, tilt, zoom);
+    pos.pan = pan;
+    pos.tilt = tilt;
+    pos.zoom = zoom;
+    drop(pos);
+
+    // Dispatch to active PTZ controller if connected
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher
+            .move_absolute(pan, tilt, zoom)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+
     Ok(())
 }
 
@@ -38,9 +63,22 @@ pub async fn ptz_zoom(
     state: tauri::State<'_, AppState>,
     zoom: f64,
 ) -> Result<(), String> {
+    let zoom = zoom.clamp(0.0, 1.0);
+
+    // Update local position tracking
     let mut pos = state.current_position.lock().await;
-    pos.zoom = zoom.clamp(0.0, 1.0);
-    log::info!("PTZ zoom: {}", zoom);
+    pos.zoom = zoom;
+    drop(pos);
+
+    // Dispatch to active PTZ controller if connected
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher
+            .zoom_to(zoom)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+
     Ok(())
 }
 
@@ -55,14 +93,31 @@ pub async fn ptz_recall_preset(
         .find_preset(&preset_id)
         .ok_or("Preset not found")?;
 
+    let pan = preset.pan;
+    let tilt = preset.tilt;
+    let zoom = preset.zoom;
+    let name = preset.name.clone();
+    drop(profiles);
+
+    // Update local position tracking
     let mut pos = state.current_position.lock().await;
-    pos.pan = preset.pan;
-    pos.tilt = preset.tilt;
-    pos.zoom = preset.zoom;
+    pos.pan = pan;
+    pos.tilt = tilt;
+    pos.zoom = zoom;
+    drop(pos);
+
+    // Dispatch absolute move to active PTZ controller
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher
+            .move_absolute(pan, tilt, zoom)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
 
     log::info!(
         "PTZ recall preset '{}': pan={}, tilt={}, zoom={}",
-        preset.name, preset.pan, preset.tilt, preset.zoom
+        name, pan, tilt, zoom
     );
     Ok(())
 }
@@ -70,9 +125,17 @@ pub async fn ptz_recall_preset(
 /// Store the current camera position as a camera-native preset.
 #[tauri::command]
 pub async fn ptz_store_preset(
-    _state: tauri::State<'_, AppState>,
+    state: tauri::State<'_, AppState>,
     preset_index: u8,
 ) -> Result<(), String> {
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher
+            .store_preset(preset_index)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+
     log::info!("PTZ store preset index: {}", preset_index);
     Ok(())
 }
@@ -82,6 +145,27 @@ pub async fn ptz_store_preset(
 pub async fn ptz_get_position(
     state: tauri::State<'_, AppState>,
 ) -> Result<PtzPosition, String> {
+    // If we have an active controller, query the camera for its real position
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        match dispatcher.get_position().await {
+            Ok(hw_pos) => {
+                drop(dispatcher);
+                // Update local tracking with hardware position
+                let mut pos = state.current_position.lock().await;
+                pos.pan = hw_pos.pan;
+                pos.tilt = hw_pos.tilt;
+                pos.zoom = hw_pos.zoom;
+                return Ok(hw_pos);
+            }
+            Err(e) => {
+                log::warn!("Failed to query hardware position, using local: {}", e);
+            }
+        }
+    }
+    drop(dispatcher);
+
+    // Fallback to local position tracking
     let pos = state.current_position.lock().await;
     Ok(pos.clone())
 }

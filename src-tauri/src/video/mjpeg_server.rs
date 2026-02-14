@@ -71,8 +71,11 @@ async fn stream_handler(
 }
 
 /// Start the MJPEG HTTP server on a random available port.
-/// Returns the port number.
-pub async fn start_server(state: Arc<MjpegState>) -> Result<u16, String> {
+/// Returns the port number and a shutdown sender.
+/// Send `true` on the watch channel to gracefully shut down the server.
+pub async fn start_server(
+    state: Arc<MjpegState>,
+) -> Result<(u16, tokio::sync::watch::Sender<bool>), String> {
     let app = Router::new()
         .route("/stream", get(stream_handler))
         .with_state(state);
@@ -83,12 +86,23 @@ pub async fn start_server(state: Arc<MjpegState>) -> Result<u16, String> {
 
     let port = listener.local_addr().map_err(|e| e.to_string())?.port();
 
+    let (shutdown_tx, mut shutdown_rx) = tokio::sync::watch::channel(false);
+
     tokio::spawn(async move {
         axum::serve(listener, app)
+            .with_graceful_shutdown(async move {
+                // Wait until shutdown signal is received
+                while !*shutdown_rx.borrow_and_update() {
+                    if shutdown_rx.changed().await.is_err() {
+                        break;
+                    }
+                }
+            })
             .await
             .expect("MJPEG server error");
+        log::info!("MJPEG server on port {} shut down", port);
     });
 
     log::info!("MJPEG server started on port {}", port);
-    Ok(port)
+    Ok((port, shutdown_tx))
 }

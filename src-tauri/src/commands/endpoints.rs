@@ -36,24 +36,63 @@ pub async fn delete_endpoint(
     state: tauri::State<'_, AppState>,
     endpoint_id: String,
 ) -> Result<(), String> {
+    // If deleting the active endpoint, clear the dispatcher
+    let active_id = state.active_endpoint_id.lock().await.clone();
+    if active_id.as_deref() == Some(&endpoint_id) {
+        let mut dispatcher = state.ptz_dispatcher.lock().await;
+        dispatcher.clear_controller();
+        *state.active_endpoint_id.lock().await = None;
+    }
+
     let mut endpoints = state.endpoints.lock().await;
     endpoints.delete(&endpoint_id)
 }
 
-/// Set the active camera endpoint.
+/// Set the active camera endpoint and wire up the PTZ dispatcher.
 #[tauri::command]
 pub async fn set_active_endpoint(
     state: tauri::State<'_, AppState>,
     endpoint_id: String,
 ) -> Result<(), String> {
-    // Verify endpoint exists
+    // Look up the endpoint configuration
     let endpoints = state.endpoints.lock().await;
-    endpoints
+    let endpoint = endpoints
         .get(&endpoint_id)
         .ok_or("Endpoint not found")?;
     drop(endpoints);
 
-    *state.active_endpoint_id.lock().await = Some(endpoint_id);
+    // Create the appropriate protocol controller
+    let controller: Box<dyn crate::ptz::controller::PtzController> = match &endpoint.config {
+        ProtocolConfig::Ndi => {
+            Box::new(crate::ndi::ptz::NdiPtzController::new())
+        }
+        ProtocolConfig::Visca { host, port } => {
+            Box::new(
+                crate::visca::client::ViscaClient::new(host, *port)
+                    .map_err(|e| format!("Failed to create VISCA client: {}", e))?,
+            )
+        }
+        ProtocolConfig::PanasonicAw { host, port, .. } => {
+            Box::new(
+                crate::panasonic::client::PanasonicClient::new(host, *port)
+                    .map_err(|e| format!("Failed to create Panasonic client: {}", e))?,
+            )
+        }
+        ProtocolConfig::BirdDogRest { host, port } => {
+            Box::new(
+                crate::birddog::client::BirdDogClient::new(host, *port)
+                    .map_err(|e| format!("Failed to create BirdDog client: {}", e))?,
+            )
+        }
+    };
+
+    // Set the controller on the dispatcher
+    let mut dispatcher = state.ptz_dispatcher.lock().await;
+    dispatcher.set_controller(controller);
+    drop(dispatcher);
+
+    *state.active_endpoint_id.lock().await = Some(endpoint_id.clone());
+    log::info!("Active endpoint set to '{}' ({})", endpoint.name, endpoint_id);
     Ok(())
 }
 
