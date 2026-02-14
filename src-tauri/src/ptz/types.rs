@@ -29,9 +29,10 @@ pub enum PtzProtocol {
 }
 
 /// Protocol-specific connection configuration.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum ProtocolConfig {
+    #[default]
     Ndi,
     Visca {
         host: String,
@@ -47,12 +48,6 @@ pub enum ProtocolConfig {
         host: String,
         port: u16,
     },
-}
-
-impl Default for ProtocolConfig {
-    fn default() -> Self {
-        Self::Ndi
-    }
 }
 
 /// A camera endpoint definition for PTZ control.

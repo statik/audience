@@ -9,6 +9,12 @@ pub struct MjpegState {
     pub frame_sender: broadcast::Sender<Vec<u8>>,
 }
 
+impl Default for MjpegState {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MjpegState {
     pub fn new() -> Self {
         let (sender, _) = broadcast::channel(4); // Small buffer, drop old frames

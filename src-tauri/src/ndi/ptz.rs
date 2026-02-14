@@ -12,6 +12,12 @@ impl NdiPtzController {
     }
 }
 
+impl Default for NdiPtzController {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[async_trait]
 impl PtzController for NdiPtzController {
     async fn move_absolute(&self, _pan: f64, _tilt: f64, _zoom: f64) -> Result<(), PtzError> {

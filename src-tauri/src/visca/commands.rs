@@ -1,5 +1,5 @@
-/// VISCA command encoding for Sony and compatible PTZ cameras.
-/// VISCA-over-IP uses UDP with a framing header.
+//! VISCA command encoding for Sony and compatible PTZ cameras.
+//! VISCA-over-IP uses UDP with a framing header.
 
 /// VISCA-over-IP framing header (8 bytes).
 pub struct ViscaIpHeader {
