@@ -2,24 +2,44 @@ name: Release
 
 on:
   push:
-    tags: ['v*.*.*']
+    branches: [main]
 
 jobs:
-  validate-version:
+  release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      new_release_published: ${{ steps.semantic.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic.outputs.new_release_version }}
     steps:
       - uses: actions/checkout@v4
-      - name: Validate tag matches package.json
-        run: |
-          TAG_VERSION="${GITHUB_REF#refs/tags/v}"
-          PKG_VERSION=$(node -p "require('./package.json').version")
-          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
-            echo "Tag version ($TAG_VERSION) does not match package.json ($PKG_VERSION)"
-            exit 1
-          fi
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run semantic-release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          extra_plugins: |
+            @semantic-release/changelog
+            @semantic-release/exec
+            @semantic-release/git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build:
-    needs: validate-version
+    needs: release
+    if: needs.release.outputs.new_release_published == 'true'
     strategy:
       matrix:
         include:
@@ -30,6 +50,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: v${{ needs.release.outputs.new_release_version }}
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -95,44 +117,22 @@ jobs:
             src-tauri/target/**/release/bundle/msi/*.msi
             src-tauri/target/**/release/bundle/nsis/*.exe
 
-  publish-release:
-    needs: build
+  upload-assets:
+    needs: [release, build]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
           path: artifacts/
 
-      - name: Generate changelog
+      - name: Upload assets to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Simple changelog from git log
-          PREV_TAG=$(git tag --sort=-creatordate | head -2 | tail -1)
-          if [ -n "$PREV_TAG" ]; then
-            git log --pretty=format:"- %s (%h)" "$PREV_TAG"..HEAD > CHANGELOG_RELEASE.md
-          else
-            git log --pretty=format:"- %s (%h)" > CHANGELOG_RELEASE.md
-          fi
-
-      - name: Determine pre-release
-        id: prerelease
-        run: |
-          TAG="${GITHUB_REF#refs/tags/v}"
-          if [[ "$TAG" == *-* ]]; then
-            echo "is_prerelease=true" >> $GITHUB_OUTPUT
-          else
-            echo "is_prerelease=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          body_path: CHANGELOG_RELEASE.md
-          prerelease: ${{ steps.prerelease.outputs.is_prerelease }}
-          files: artifacts/**/*
+          gh release upload "v${{ needs.release.outputs.new_release_version }}" \
+            artifacts/**/* --clobber
