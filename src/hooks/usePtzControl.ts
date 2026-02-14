@@ -1,6 +1,7 @@
 import { useCallback, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "../store/app-store";
+import { calculateClickVector } from "../utils/ptz-math";
 import type { PtzPosition } from "@shared/types";
 
 const MIN_COMMAND_INTERVAL_MS = 100;
@@ -85,16 +86,11 @@ export function usePtzControl() {
   const handleVideoClick = useCallback(
     (clickX: number, clickY: number, canvasWidth: number, canvasHeight: number) => {
       const pos = useAppStore.getState().currentPosition;
-      const centerX = canvasWidth / 2;
-      const centerY = canvasHeight / 2;
-      const deltaX = (clickX - centerX) / centerX;
-      const deltaY = (centerY - clickY) / centerY;
-
-      const zoomFactor = pos.zoom > 0 ? 1 / (1 + pos.zoom * 4) : 1;
-      const panAdjustment = deltaX * settings.click_sensitivity * zoomFactor;
-      const tiltAdjustment = deltaY * settings.click_sensitivity * zoomFactor;
-
-      moveRelative(panAdjustment, tiltAdjustment);
+      const { panDelta, tiltDelta } = calculateClickVector(
+        clickX, clickY, canvasWidth, canvasHeight,
+        settings.click_sensitivity, pos.zoom
+      );
+      moveRelative(panDelta, tiltDelta);
     },
     [settings.click_sensitivity, moveRelative]
   );

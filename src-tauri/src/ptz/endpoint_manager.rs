@@ -77,3 +77,109 @@ impl EndpointManager {
         self.save()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ptz::types::{ProtocolConfig, PtzProtocol};
+    use std::fs;
+
+    fn temp_dir() -> PathBuf {
+        let dir = std::env::temp_dir().join(format!("ptzcam-test-endpoints-{}", uuid::Uuid::new_v4()));
+        fs::create_dir_all(&dir).unwrap();
+        dir
+    }
+
+    fn make_endpoint(id: &str, name: &str) -> CameraEndpoint {
+        CameraEndpoint {
+            id: id.to_string(),
+            name: name.to_string(),
+            protocol: PtzProtocol::Visca,
+            config: ProtocolConfig::Visca {
+                host: "192.168.1.100".to_string(),
+                port: 1259,
+            },
+        }
+    }
+
+    #[test]
+    fn starts_empty() {
+        let dir = temp_dir();
+        let mgr = EndpointManager::load_or_default(&dir);
+        assert!(mgr.get_all().is_empty());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn create_and_get_endpoint() {
+        let dir = temp_dir();
+        let mut mgr = EndpointManager::load_or_default(&dir);
+        mgr.create(make_endpoint("e1", "Camera 1")).unwrap();
+
+        assert_eq!(mgr.get_all().len(), 1);
+        let ep = mgr.get("e1").unwrap();
+        assert_eq!(ep.name, "Camera 1");
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn get_returns_none_for_missing() {
+        let dir = temp_dir();
+        let mgr = EndpointManager::load_or_default(&dir);
+        assert!(mgr.get("nope").is_none());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn update_modifies_existing() {
+        let dir = temp_dir();
+        let mut mgr = EndpointManager::load_or_default(&dir);
+        mgr.create(make_endpoint("e1", "Old Name")).unwrap();
+
+        let updated = make_endpoint("e1", "New Name");
+        mgr.update(updated).unwrap();
+        assert_eq!(mgr.get("e1").unwrap().name, "New Name");
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn update_nonexistent_returns_error() {
+        let dir = temp_dir();
+        let mut mgr = EndpointManager::load_or_default(&dir);
+        let result = mgr.update(make_endpoint("nope", "Ghost"));
+        assert!(result.is_err());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn delete_removes_endpoint() {
+        let dir = temp_dir();
+        let mut mgr = EndpointManager::load_or_default(&dir);
+        mgr.create(make_endpoint("e1", "ToDelete")).unwrap();
+        mgr.delete("e1").unwrap();
+        assert!(mgr.get_all().is_empty());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn delete_nonexistent_returns_error() {
+        let dir = temp_dir();
+        let mut mgr = EndpointManager::load_or_default(&dir);
+        let result = mgr.delete("nope");
+        assert!(result.is_err());
+        fs::remove_dir_all(&dir).ok();
+    }
+
+    #[test]
+    fn save_and_reload_persists_data() {
+        let dir = temp_dir();
+        {
+            let mut mgr = EndpointManager::load_or_default(&dir);
+            mgr.create(make_endpoint("e1", "Persisted")).unwrap();
+        }
+        let mgr = EndpointManager::load_or_default(&dir);
+        assert_eq!(mgr.get_all().len(), 1);
+        assert_eq!(mgr.get("e1").unwrap().name, "Persisted");
+        fs::remove_dir_all(&dir).ok();
+    }
+}

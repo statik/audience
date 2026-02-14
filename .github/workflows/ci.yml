@@ -41,6 +41,9 @@ jobs:
       - name: Typecheck frontend
         run: npx tsc --noEmit
 
+      - name: Test frontend
+        run: npx vitest run
+
       # Rust checks
       - name: Check Rust formatting
         run: cargo fmt --check --manifest-path src-tauri/Cargo.toml

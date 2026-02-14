@@ -47,8 +47,23 @@ pub async fn update_preset(
     state: tauri::State<'_, AppState>,
     preset: Preset,
 ) -> Result<Preset, String> {
+    if !preset.pan.is_finite() || !preset.tilt.is_finite() || !preset.zoom.is_finite() {
+        return Err("Preset values must be finite numbers".to_string());
+    }
+    let name = preset.name.chars().take(100).collect::<String>();
+    if name.trim().is_empty() {
+        return Err("Preset name cannot be empty".to_string());
+    }
+    let validated = Preset {
+        id: preset.id,
+        name,
+        pan: preset.pan.clamp(-1.0, 1.0),
+        tilt: preset.tilt.clamp(-1.0, 1.0),
+        zoom: preset.zoom.clamp(0.0, 1.0),
+        color: preset.color,
+    };
     let mut profiles = state.profiles.lock().await;
-    profiles.update_preset(preset)
+    profiles.update_preset(validated)
 }
 
 /// Delete a preset by ID.
