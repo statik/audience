@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/statik/audience/compare/v1.0.0...v1.0.1) (2026-02-15)
+
+
+### Bug Fixes
+
+* **ci:** skip prek install in release workflow ([#10](https://github.com/statik/audience/issues/10)) ([e97ec81](https://github.com/statik/audience/commit/e97ec81896b7cc9c42cbd879763bb27a8f1e1337))
+* **ci:** use explicit file globs for release asset upload ([#9](https://github.com/statik/audience/issues/9)) ([1205702](https://github.com/statik/audience/commit/12057022ed44b76388e6437021652e625306b67c))
+
 # 1.0.0 (2026-02-15)
 
 

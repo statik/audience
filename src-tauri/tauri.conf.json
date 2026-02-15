@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicedoc/tauri-conf/main/tauri.conf.json",
   "productName": "PTZ Cam Controller",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "identifier": "com.ptzcam.controller",
   "build": {
     "frontendDist": "../dist",
