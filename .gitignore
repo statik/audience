@@ -27,6 +27,9 @@ Thumbs.db
 .env.local
 .env.*.local
 
+# Claude Code
+.claude/settings.local.json
+
 # Tauri
 src-tauri/target/
 src-tauri/gen/
