@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/statik/audience/compare/v1.2.0...v1.2.1) (2026-02-15)
+
+
+### Performance Improvements
+
+* **ci:** optimize release build speed and pin actions to SHA ([#16](https://github.com/statik/audience/issues/16)) ([aebdf41](https://github.com/statik/audience/commit/aebdf412995a7f87f88a9537ad7b23a3544c1aae))
+
 # [1.2.0](https://github.com/statik/audience/compare/v1.1.0...v1.2.0) (2026-02-15)
 
 

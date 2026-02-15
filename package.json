@@ -1,6 +1,6 @@
 {
   "name": "audience",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "Cross-platform PTZ camera controller with live video feed and preset management",
   "type": "module",
