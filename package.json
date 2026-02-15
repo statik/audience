@@ -14,7 +14,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "version-bump": "node scripts/version-bump.mjs",
-    "prepare": "husky"
+    "prepare": "prek install && prek install --hook-type commit-msg"
   },
   "license": "MIT",
   "dependencies": {
@@ -38,7 +38,6 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.18.0",
     "globals": "^15.14.0",
-    "husky": "^9.1.7",
     "jsdom": "^28.0.0",
     "postcss": "^8.5.1",
     "tailwindcss": "^4.0.0",
