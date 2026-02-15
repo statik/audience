@@ -3,6 +3,6 @@
 <plist version="1.0">
 <dict>
 	<key>NSCameraUsageDescription</key>
-	<string>PTZ Cam Controller needs camera access to display your video sources</string>
+	<string>Audience needs camera access to display your video sources</string>
 </dict>
 </plist>
