@@ -4,6 +4,25 @@ Cross-platform desktop application for controlling PTZ (Pan-Tilt-Zoom) cameras v
 
 Built with **Tauri 2** (Rust backend + React/TypeScript frontend).
 
+## Installation
+
+### macOS (Homebrew)
+
+```bash
+brew install --cask kindlyops/tap/audience
+```
+
+### Windows (Scoop)
+
+```bash
+scoop bucket add kindlyops https://github.com/kindlyops/kindlyops-scoop
+scoop install audience
+```
+
+### Manual Download
+
+Grab the latest `.dmg` (macOS) or `.msi` (Windows) from the [Releases](https://github.com/statik/audience/releases) page.
+
 ## System Architecture
 
 ```
