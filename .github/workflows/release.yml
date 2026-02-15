@@ -32,7 +32,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts
 
       - name: Run semantic-release
         id: semantic
@@ -44,7 +44,6 @@ jobs:
             @semantic-release/git
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          HUSKY: "0"
 
   build:
     needs: release
@@ -71,7 +70,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --ignore-scripts
 
       # Code signing setup
       - name: Import Windows code signing certificate
