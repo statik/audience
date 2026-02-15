@@ -144,4 +144,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release upload "v${{ needs.release.outputs.new_release_version }}" \
-            artifacts/**/* --clobber
+            artifacts/**/*.dmg artifacts/**/*.msi artifacts/**/*.exe --clobber
