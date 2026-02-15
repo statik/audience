@@ -20,12 +20,12 @@ pub enum PtzCommand {
 
 /// Supported PTZ control protocols.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-#[serde(tag = "type")]
 pub enum PtzProtocol {
     Ndi,
     Visca,
     PanasonicAw,
     BirdDogRest,
+    Simulated,
 }
 
 /// Protocol-specific connection configuration.
@@ -48,6 +48,7 @@ pub enum ProtocolConfig {
         host: String,
         port: u16,
     },
+    Simulated,
 }
 
 /// A camera endpoint definition for PTZ control.

@@ -3,6 +3,7 @@ import { useVideoFeed } from "../hooks/useVideoFeed";
 import { usePtzControl } from "../hooks/usePtzControl";
 import { useAppStore } from "../store/app-store";
 import { PresetOverlay } from "./PresetOverlay";
+import { SimulatedFeed } from "./SimulatedFeed";
 
 export function VideoCanvas() {
   const { videoRef, error } = useVideoFeed();
@@ -11,7 +12,22 @@ export function VideoCanvas() {
   const containerRef = useRef<HTMLDivElement>(null);
   const mode = useAppStore((s) => s.mode);
   const isConnected = useAppStore((s) => s.isConnected);
+  const setIsConnected = useAppStore((s) => s.setIsConnected);
+  const setConnectionLabel = useAppStore((s) => s.setConnectionLabel);
+  const endpoints = useAppStore((s) => s.endpoints);
+  const activeEndpointId = useAppStore((s) => s.activeEndpointId);
   const [canvasDimensions, setCanvasDimensions] = useState({ width: 800, height: 450 });
+
+  const isSimulated = endpoints.find(
+    (e) => e.id === activeEndpointId,
+  )?.protocol === "Simulated";
+
+  useEffect(() => {
+    if (isSimulated) {
+      setIsConnected(true);
+      setConnectionLabel("Simulated Camera");
+    }
+  }, [isSimulated, setIsConnected, setConnectionLabel]);
 
   // Sync canvas size to container and track dimensions in state
   useEffect(() => {
@@ -60,7 +76,7 @@ export function VideoCanvas() {
       ref={containerRef}
       className="relative w-full h-full bg-black overflow-hidden"
     >
-      {/* Video element */}
+      {/* Video element (always rendered so camera feed shows behind overlay) */}
       <video
         ref={videoRef}
         autoPlay
@@ -69,8 +85,16 @@ export function VideoCanvas() {
         className="absolute inset-0 w-full h-full object-contain"
       />
 
+      {/* Simulated PTZ overlay (transparent, layered on top of video) */}
+      {isSimulated && (
+        <SimulatedFeed
+          width={canvasDimensions.width}
+          height={canvasDimensions.height}
+        />
+      )}
+
       {/* No signal indicator */}
-      {!isConnected && (
+      {!isConnected && !isSimulated && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
             <div className="text-2xl font-bold text-[var(--color-text-muted)] mb-2">

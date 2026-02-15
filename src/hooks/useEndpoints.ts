@@ -82,6 +82,16 @@ export function useEndpoints() {
     [setActiveEndpointId]
   );
 
+  const clearActiveEndpoint = useCallback(async () => {
+    try {
+      await invoke("clear_active_endpoint");
+      setActiveEndpointId(null);
+    } catch (err) {
+      console.error("Failed to clear active endpoint:", err);
+      throw err;
+    }
+  }, [setActiveEndpointId]);
+
   const testConnection = useCallback(
     async (config: ProtocolConfig): Promise<string> => {
       return invoke<string>("test_endpoint_connection", { config });
@@ -97,6 +107,7 @@ export function useEndpoints() {
     updateEndpoint,
     deleteEndpoint,
     setActiveEndpoint,
+    clearActiveEndpoint,
     testConnection,
   };
 }

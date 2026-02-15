@@ -7,6 +7,7 @@ pub mod video;
 // Protocol-specific modules
 pub mod birddog;
 pub mod panasonic;
+pub mod simulator;
 pub mod visca;
 
 use tauri::Manager;
@@ -92,6 +93,7 @@ pub fn run() {
             commands::endpoints::update_endpoint,
             commands::endpoints::delete_endpoint,
             commands::endpoints::set_active_endpoint,
+            commands::endpoints::clear_active_endpoint,
             commands::endpoints::test_endpoint_connection,
             commands::settings::get_settings,
             commands::settings::update_settings,

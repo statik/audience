@@ -4,7 +4,7 @@ use crate::AppState;
 /// Validate the host field in a protocol config before persisting.
 fn validate_endpoint_config(config: &ProtocolConfig) -> Result<(), String> {
     match config {
-        ProtocolConfig::Ndi => Ok(()),
+        ProtocolConfig::Ndi | ProtocolConfig::Simulated => Ok(()),
         ProtocolConfig::Visca { host, .. }
         | ProtocolConfig::PanasonicAw { host, .. }
         | ProtocolConfig::BirdDogRest { host, .. } => validate_host(host),
@@ -61,6 +61,17 @@ pub async fn delete_endpoint(
     endpoints.delete(&endpoint_id)
 }
 
+/// Clear the active camera endpoint, removing the PTZ controller.
+#[tauri::command]
+pub async fn clear_active_endpoint(state: tauri::State<'_, AppState>) -> Result<(), String> {
+    let mut dispatcher = state.ptz_dispatcher.lock().await;
+    dispatcher.clear_controller();
+    drop(dispatcher);
+    *state.active_endpoint_id.lock().await = None;
+    log::info!("Active endpoint cleared");
+    Ok(())
+}
+
 /// Set the active camera endpoint and wire up the PTZ dispatcher.
 #[tauri::command]
 pub async fn set_active_endpoint(
@@ -87,6 +98,7 @@ pub async fn set_active_endpoint(
             crate::birddog::client::BirdDogClient::new(host, *port)
                 .map_err(|e| format!("Failed to create BirdDog client: {}", e))?,
         ),
+        ProtocolConfig::Simulated => Box::new(crate::simulator::client::SimulatedController::new()),
     };
 
     // Set the controller on the dispatcher
@@ -138,5 +150,6 @@ pub async fn test_endpoint_connection(config: ProtocolConfig) -> Result<String, 
                 Err(e) => Err(format!("BirdDog connection failed: {}", e)),
             }
         }
+        ProtocolConfig::Simulated => Ok("Simulated camera ready".to_string()),
     }
 }
