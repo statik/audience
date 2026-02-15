@@ -14,6 +14,7 @@ export function EndpointManager() {
     updateEndpoint,
     deleteEndpoint,
     setActiveEndpoint,
+    clearActiveEndpoint,
     testConnection,
   } = useEndpoints();
 
@@ -45,6 +46,8 @@ export function EndpointManager() {
         return { type: "PanasonicAw", host: "192.168.1.100", port: 80 };
       case "BirdDogRest":
         return { type: "BirdDogRest", host: "192.168.1.100", port: 8080 };
+      case "Simulated":
+        return { type: "Simulated" };
     }
   };
 
@@ -59,13 +62,17 @@ export function EndpointManager() {
 
   const handleSave = async () => {
     if (!editingEndpoint || !editingEndpoint.name.trim()) return;
-    if (isNew) {
-      await createEndpoint(editingEndpoint);
-    } else {
-      await updateEndpoint(editingEndpoint);
+    try {
+      if (isNew) {
+        await createEndpoint(editingEndpoint);
+      } else {
+        await updateEndpoint(editingEndpoint);
+      }
+      setEditingEndpoint(null);
+      setIsNew(false);
+    } catch (err) {
+      setTestResult(`Error saving: ${err}`);
     }
-    setEditingEndpoint(null);
-    setIsNew(false);
   };
 
   const handleTest = async () => {
@@ -114,9 +121,13 @@ export function EndpointManager() {
             </div>
             <button
               className="text-xs text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
-              onClick={() => setActiveEndpoint(ep.id)}
+              onClick={() =>
+                activeEndpointId === ep.id
+                  ? clearActiveEndpoint()
+                  : setActiveEndpoint(ep.id)
+              }
             >
-              {activeEndpointId === ep.id ? "Active" : "Activate"}
+              {activeEndpointId === ep.id ? "Deactivate" : "Activate"}
             </button>
             <button
               className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
@@ -183,6 +194,7 @@ export function EndpointManager() {
               <option value="Visca">VISCA-over-IP</option>
               <option value="PanasonicAw">Panasonic AW (HTTP)</option>
               <option value="BirdDogRest">BirdDog REST API</option>
+              <option value="Simulated">Simulated (no hardware)</option>
             </select>
           </div>
 

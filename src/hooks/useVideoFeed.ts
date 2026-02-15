@@ -11,6 +11,11 @@ export function useVideoFeed() {
   const setIsConnected = useAppStore((s) => s.setIsConnected);
   const setConnectionLabel = useAppStore((s) => s.setConnectionLabel);
   const setFps = useAppStore((s) => s.setFps);
+  const endpoints = useAppStore((s) => s.endpoints);
+  const activeEndpointId = useAppStore((s) => s.activeEndpointId);
+  const isSimulated = endpoints.find(
+    (e) => e.id === activeEndpointId,
+  )?.protocol === "Simulated";
   const [error, setError] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -79,6 +84,8 @@ export function useVideoFeed() {
 
   // Connect when source changes
   useEffect(() => {
+    if (isSimulated) return;
+
     if (!activeSource) {
       stopCurrentStream();
       setIsConnected(false);
@@ -109,7 +116,7 @@ export function useVideoFeed() {
     return () => {
       stopCurrentStream();
     };
-  }, [activeSource, connectToLocalDevice, connectToMjpeg, stopCurrentStream, setIsConnected, setConnectionLabel]);
+  }, [isSimulated, activeSource, connectToLocalDevice, connectToMjpeg, stopCurrentStream, setIsConnected, setConnectionLabel]);
 
   // Auto-reconnect on disconnect (PRD VF-7)
   useEffect(() => {

@@ -6,7 +6,7 @@ export interface PtzPosition {
 }
 
 /** Supported PTZ protocols. */
-export type PtzProtocol = "Ndi" | "Visca" | "PanasonicAw" | "BirdDogRest";
+export type PtzProtocol = "Ndi" | "Visca" | "PanasonicAw" | "BirdDogRest" | "Simulated";
 
 /** Protocol-specific connection configuration. */
 export type ProtocolConfig =
@@ -19,7 +19,8 @@ export type ProtocolConfig =
       username?: string;
       password?: string;
     }
-  | { type: "BirdDogRest"; host: string; port: number };
+  | { type: "BirdDogRest"; host: string; port: number }
+  | { type: "Simulated" };
 
 /** A camera endpoint for PTZ control. */
 export interface CameraEndpoint {
