@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicedoc/tauri-conf/main/tauri.conf.json",
-  "productName": "PTZ Cam Controller",
+  "productName": "Audience",
   "version": "1.0.3",
-  "identifier": "com.ptzcam.controller",
+  "identifier": "com.kindlyops.audience",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "PTZ Cam Controller",
+        "title": "Audience",
         "width": 1280,
         "height": 800,
         "resizable": true,
