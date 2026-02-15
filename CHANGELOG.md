@@ -1,3 +1,10 @@
+## [1.2.2](https://github.com/statik/audience/compare/v1.2.1...v1.2.2) (2026-02-15)
+
+
+### Bug Fixes
+
+* **ci:** split automerge steps and use squash merge ([#32](https://github.com/statik/audience/issues/32)) ([1253183](https://github.com/statik/audience/commit/125318326d6dfe054aafd73fd2fe633f8f0bbc74))
+
 ## [1.2.1](https://github.com/statik/audience/compare/v1.2.0...v1.2.1) (2026-02-15)
 
 
