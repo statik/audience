@@ -1,6 +1,6 @@
 {
   "name": "ptzcam-controller",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "description": "Cross-platform PTZ camera controller with live video feed and preset management",
   "type": "module",

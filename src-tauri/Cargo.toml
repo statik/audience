@@ -1,6 +1,6 @@
 [package]
 name = "ptzcam-controller"
-version = "1.0.2"
+version = "1.0.3"
 description = "Cross-platform PTZ camera controller"
 authors = ["PTZ Cam Controller Contributors"]
 edition = "2021"

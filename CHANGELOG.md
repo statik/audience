@@ -1,3 +1,10 @@
+## [1.0.3](https://github.com/statik/audience/compare/v1.0.2...v1.0.3) (2026-02-15)
+
+
+### Bug Fixes
+
+* **ci:** enable globstar for release asset upload globs ([#12](https://github.com/statik/audience/issues/12)) ([0aac58f](https://github.com/statik/audience/commit/0aac58f34922a7680489fff81578a44ace4c967a))
+
 ## [1.0.2](https://github.com/statik/audience/compare/v1.0.1...v1.0.2) (2026-02-15)
 
 
