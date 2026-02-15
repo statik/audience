@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/statik/audience/compare/v1.0.1...v1.0.2) (2026-02-15)
+
+
+### Bug Fixes
+
+* enable macOS camera access in Tauri WebView ([#11](https://github.com/statik/audience/issues/11)) ([341bad2](https://github.com/statik/audience/commit/341bad2da2ec6c651f428082013ce3e926cba5ee))
+
 ## [1.0.1](https://github.com/statik/audience/compare/v1.0.0...v1.0.1) (2026-02-15)
 
 
