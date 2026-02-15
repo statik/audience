@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/statik/audience/compare/v1.1.0...v1.2.0) (2026-02-15)
+
+
+### Features
+
+* add simulated PTZ camera for dev testing and demos ([#14](https://github.com/statik/audience/issues/14)) ([07b63c0](https://github.com/statik/audience/commit/07b63c043772fc4326a805eeb7ffbe2348b3d50b))
+
 # [1.1.0](https://github.com/statik/audience/compare/v1.0.3...v1.1.0) (2026-02-15)
 
 
