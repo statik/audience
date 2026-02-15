@@ -142,5 +142,11 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload "v${{ needs.release.outputs.new_release_version }}" \
-            artifacts/**/*.dmg artifacts/**/*.msi artifacts/**/*.exe --clobber
+          shopt -s globstar nullglob
+          files=(artifacts/**/*.dmg artifacts/**/*.msi artifacts/**/*.exe)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::No release assets found in artifacts/"
+            exit 1
+          fi
+          printf '%s\n' "${files[@]}"
+          gh release upload "v${{ needs.release.outputs.new_release_version }}" "${files[@]}" --clobber
