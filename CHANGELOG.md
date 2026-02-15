@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/statik/audience/compare/v1.0.3...v1.1.0) (2026-02-15)
+
+
+### Features
+
+* **ci:** add Scoop and Homebrew publishing to release pipeline ([#15](https://github.com/statik/audience/issues/15)) ([e94e509](https://github.com/statik/audience/commit/e94e50965fde411d78f63f3d1d78975a511327b7))
+
 ## [1.0.3](https://github.com/statik/audience/compare/v1.0.2...v1.0.3) (2026-02-15)
 
 

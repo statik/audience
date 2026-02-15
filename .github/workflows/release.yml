@@ -150,3 +150,25 @@ jobs:
           fi
           printf '%s\n' "${files[@]}"
           gh release upload "v${{ needs.release.outputs.new_release_version }}" "${files[@]}" --clobber
+
+  update-package-managers:
+    needs: [release, upload-assets]
+    if: needs.release.outputs.new_release_published == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate token for package manager repos
+        id: app-token
+        uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf  # v2.2.1
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          owner: kindlyops
+          repositories: kindlyops-scoop,homebrew-tap
+
+      - uses: actions/checkout@v4
+
+      - name: Update Scoop and Homebrew manifests
+        env:
+          VERSION: ${{ needs.release.outputs.new_release_version }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: bash scripts/update-package-managers.sh
