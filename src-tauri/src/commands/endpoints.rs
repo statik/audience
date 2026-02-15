@@ -63,9 +63,7 @@ pub async fn delete_endpoint(
 
 /// Clear the active camera endpoint, removing the PTZ controller.
 #[tauri::command]
-pub async fn clear_active_endpoint(
-    state: tauri::State<'_, AppState>,
-) -> Result<(), String> {
+pub async fn clear_active_endpoint(state: tauri::State<'_, AppState>) -> Result<(), String> {
     let mut dispatcher = state.ptz_dispatcher.lock().await;
     dispatcher.clear_controller();
     drop(dispatcher);
