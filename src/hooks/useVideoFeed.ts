@@ -197,6 +197,12 @@ export function useVideoFeed() {
 
   const enumerateDevices = useCallback(async (): Promise<VideoSource[]> => {
     try {
+      // Request a temporary stream to trigger the macOS permission prompt.
+      // WKWebView won't return devices from enumerateDevices() until the
+      // user has granted camera access via getUserMedia().
+      const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      tempStream.getTracks().forEach((t) => t.stop());
+
       const devices = await navigator.mediaDevices.enumerateDevices();
       return devices
         .filter((d) => d.kind === "videoinput")

@@ -22,7 +22,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self'; script-src 'self'; connect-src 'self' http://127.0.0.1:*; img-src 'self' http://127.0.0.1:*; style-src 'self' 'unsafe-inline'; media-src 'self' http://127.0.0.1:*"
+      "csp": "default-src 'self'; script-src 'self'; connect-src 'self' http://127.0.0.1:*; img-src 'self' blob: http://127.0.0.1:*; style-src 'self' 'unsafe-inline'; media-src 'self' blob: mediastream: http://127.0.0.1:*"
     }
   },
   "bundle": {

@@ -22,6 +22,10 @@ test-frontend:
 test-rust:
     cargo test --manifest-path src-tauri/Cargo.toml
 
+# Run local dev version of the app
+dev:
+    npx tauri dev
+
 # Auto-fix formatting
 fmt:
     cargo fmt --manifest-path src-tauri/Cargo.toml
