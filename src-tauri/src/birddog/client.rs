@@ -136,4 +136,34 @@ impl PtzController for BirdDogClient {
         self.get_json("about").await?;
         Ok(())
     }
+
+    async fn continuous_move(
+        &self,
+        pan_speed: f64,
+        tilt_speed: f64,
+    ) -> Result<(), PtzError> {
+        self.post_json(
+            "ptz",
+            serde_json::json!({
+                "pan": pan_speed,
+                "tilt": tilt_speed,
+                "mode": "velocity"
+            }),
+        )
+        .await?;
+        Ok(())
+    }
+
+    async fn stop(&self) -> Result<(), PtzError> {
+        self.post_json(
+            "ptz",
+            serde_json::json!({
+                "pan": 0.0,
+                "tilt": 0.0,
+                "mode": "velocity"
+            }),
+        )
+        .await?;
+        Ok(())
+    }
 }

@@ -9,13 +9,15 @@ import { SettingsPanel } from "./components/SettingsPanel";
 import { useAppStore } from "./store/app-store";
 import { usePresets } from "./hooks/usePresets";
 import { useEndpoints } from "./hooks/useEndpoints";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 
 export default function App() {
   const sidebarCollapsed = useAppStore((s) => s.sidebarCollapsed);
-  const mode = useAppStore((s) => s.mode);
   const settingsOpen = useAppStore((s) => s.settingsOpen);
   const { loadPresets } = usePresets();
   const { loadEndpoints } = useEndpoints();
+
+  useKeyboardShortcuts();
 
   useEffect(() => {
     loadPresets();
@@ -44,11 +46,9 @@ export default function App() {
                 <EndpointManager />
               </div>
             </div>
-            {mode === "calibration" && (
-              <div className="border-t border-[var(--color-border)]">
-                <PtzControls />
-              </div>
-            )}
+            <div className="border-t border-[var(--color-border)]">
+              <PtzControls />
+            </div>
           </div>
         )}
       </div>
