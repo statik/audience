@@ -34,11 +34,7 @@ pub trait PtzController: Send + Sync {
     /// Start continuous pan/tilt movement at a given velocity.
     /// pan_speed: -1.0 (left) to 1.0 (right), 0 = stop pan.
     /// tilt_speed: -1.0 (down) to 1.0 (up), 0 = stop tilt.
-    async fn continuous_move(
-        &self,
-        _pan_speed: f64,
-        _tilt_speed: f64,
-    ) -> Result<(), PtzError> {
+    async fn continuous_move(&self, _pan_speed: f64, _tilt_speed: f64) -> Result<(), PtzError> {
         Ok(())
     }
 
@@ -146,11 +142,7 @@ impl PtzDispatcher {
         self.get_controller()?.home().await
     }
 
-    pub async fn continuous_move(
-        &self,
-        pan_speed: f64,
-        tilt_speed: f64,
-    ) -> Result<(), PtzError> {
+    pub async fn continuous_move(&self, pan_speed: f64, tilt_speed: f64) -> Result<(), PtzError> {
         self.get_controller()?
             .continuous_move(pan_speed, tilt_speed)
             .await

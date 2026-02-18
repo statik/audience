@@ -183,10 +183,7 @@ pub async fn ptz_stop(state: tauri::State<'_, AppState>) -> Result<(), String> {
 
 /// Start continuous focus movement. Negative = near, positive = far.
 #[tauri::command]
-pub async fn ptz_focus(
-    state: tauri::State<'_, AppState>,
-    speed: f64,
-) -> Result<(), String> {
+pub async fn ptz_focus(state: tauri::State<'_, AppState>, speed: f64) -> Result<(), String> {
     let dispatcher = state.ptz_dispatcher.lock().await;
     if dispatcher.has_controller() {
         dispatcher
@@ -228,9 +225,7 @@ pub async fn ptz_set_autofocus(
 
 /// One-push autofocus trigger.
 #[tauri::command]
-pub async fn ptz_autofocus_trigger(
-    state: tauri::State<'_, AppState>,
-) -> Result<(), String> {
+pub async fn ptz_autofocus_trigger(state: tauri::State<'_, AppState>) -> Result<(), String> {
     let dispatcher = state.ptz_dispatcher.lock().await;
     if dispatcher.has_controller() {
         dispatcher

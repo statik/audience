@@ -137,11 +137,7 @@ impl PtzController for BirdDogClient {
         Ok(())
     }
 
-    async fn continuous_move(
-        &self,
-        pan_speed: f64,
-        tilt_speed: f64,
-    ) -> Result<(), PtzError> {
+    async fn continuous_move(&self, pan_speed: f64, tilt_speed: f64) -> Result<(), PtzError> {
         self.post_json(
             "ptz",
             serde_json::json!({

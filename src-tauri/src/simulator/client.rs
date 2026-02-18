@@ -116,11 +116,7 @@ impl PtzController for SimulatedController {
         Ok(())
     }
 
-    async fn continuous_move(
-        &self,
-        pan_speed: f64,
-        tilt_speed: f64,
-    ) -> Result<(), PtzError> {
+    async fn continuous_move(&self, pan_speed: f64, tilt_speed: f64) -> Result<(), PtzError> {
         // In simulation, apply a small step proportional to speed
         let mut pos = self
             .position

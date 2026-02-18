@@ -155,14 +155,12 @@ impl PtzController for ViscaClient {
             &zoom_response
         };
 
-        let (visca_pan, visca_tilt) = commands::parse_pan_tilt_response(pt_payload)
-            .ok_or(PtzError::ProtocolError(
-                "Invalid pan/tilt inquiry response".into(),
-            ))?;
-        let visca_zoom = commands::parse_zoom_response(z_payload)
-            .ok_or(PtzError::ProtocolError(
-                "Invalid zoom inquiry response".into(),
-            ))?;
+        let (visca_pan, visca_tilt) = commands::parse_pan_tilt_response(pt_payload).ok_or(
+            PtzError::ProtocolError("Invalid pan/tilt inquiry response".into()),
+        )?;
+        let visca_zoom = commands::parse_zoom_response(z_payload).ok_or(
+            PtzError::ProtocolError("Invalid zoom inquiry response".into()),
+        )?;
 
         Ok(PtzPosition {
             pan: commands::visca_pan_to_normalized(visca_pan),
@@ -183,11 +181,7 @@ impl PtzController for ViscaClient {
         Ok(())
     }
 
-    async fn continuous_move(
-        &self,
-        pan_speed: f64,
-        tilt_speed: f64,
-    ) -> Result<(), PtzError> {
+    async fn continuous_move(&self, pan_speed: f64, tilt_speed: f64) -> Result<(), PtzError> {
         if pan_speed.abs() < 0.01 && tilt_speed.abs() < 0.01 {
             return self.stop().await;
         }

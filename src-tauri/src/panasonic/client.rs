@@ -182,11 +182,7 @@ impl PtzController for PanasonicClient {
         Ok(())
     }
 
-    async fn continuous_move(
-        &self,
-        pan_speed: f64,
-        tilt_speed: f64,
-    ) -> Result<(), PtzError> {
+    async fn continuous_move(&self, pan_speed: f64, tilt_speed: f64) -> Result<(), PtzError> {
         let ps = Self::delta_to_speed(pan_speed);
         let ts = Self::delta_to_speed(tilt_speed);
         let cmd = format!("PTS{}{}", ps, ts);
