@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "1ea894c37dc7",
+  "strategy": "manual-commit",
+  "branch": "claude/review-ptz-controls-rCDAU",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src-tauri/src/birddog/client.rs",
+    "src-tauri/src/commands/ptz.rs",
+    "src-tauri/src/panasonic/client.rs",
+    "src-tauri/src/ptz/controller.rs",
+    "src-tauri/src/simulator/client.rs",
+    "src-tauri/src/visca/client.rs"
+  ],
+  "sessions": [
+    {
+      "metadata": "/1e/a894c37dc7/0/metadata.json",
+      "transcript": "/1e/a894c37dc7/0/full.jsonl",
+      "context": "/1e/a894c37dc7/0/context.md",
+      "content_hash": "/1e/a894c37dc7/0/content_hash.txt",
+      "prompt": "/1e/a894c37dc7/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 1011,
+    "cache_creation_tokens": 361278,
+    "cache_read_tokens": 9412689,
+    "output_tokens": 31407,
+    "api_call_count": 110
+  }
+}

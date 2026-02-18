@@ -1,0 +1,36 @@
+{
+  "cli_version": "0.4.5",
+  "checkpoint_id": "1ea894c37dc7",
+  "session_id": "0c2ec339-a661-40da-a9ba-1ae255ac4636",
+  "strategy": "manual-commit",
+  "created_at": "2026-02-18T16:56:01.30776185Z",
+  "branch": "claude/review-ptz-controls-rCDAU",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src-tauri/src/birddog/client.rs",
+    "src-tauri/src/commands/ptz.rs",
+    "src-tauri/src/panasonic/client.rs",
+    "src-tauri/src/ptz/controller.rs",
+    "src-tauri/src/simulator/client.rs",
+    "src-tauri/src/visca/client.rs"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "f4b7b38f7043",
+  "token_usage": {
+    "input_tokens": 1011,
+    "cache_creation_tokens": 361278,
+    "cache_read_tokens": 9412689,
+    "output_tokens": 31407,
+    "api_call_count": 110
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-02-18T16:56:00.736312903Z",
+    "agent_lines": 0,
+    "human_added": 0,
+    "human_modified": 14,
+    "human_removed": 31,
+    "total_committed": 0,
+    "agent_percentage": 0
+  },
+  "transcript_path": ".claude/projects/-home-emurphy-kindlyops-audience/0c2ec339-a661-40da-a9ba-1ae255ac4636.jsonl"
+}
