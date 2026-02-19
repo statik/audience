@@ -1,6 +1,6 @@
 [package]
 name = "audience"
-version = "1.2.2"
+version = "1.3.0"
 description = "Cross-platform PTZ camera controller"
 authors = ["Audience Contributors"]
 edition = "2021"

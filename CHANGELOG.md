@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/statik/audience/compare/v1.2.2...v1.3.0) (2026-02-19)
+
+
+### Features
+
+* add PTZ controls with joystick, keyboard shortcuts, and focus ([#34](https://github.com/statik/audience/issues/34)) ([5621c4a](https://github.com/statik/audience/commit/5621c4ac11c0a2835822e06ea8c8a542da41e365))
+
 ## [1.2.2](https://github.com/statik/audience/compare/v1.2.1...v1.2.2) (2026-02-15)
 
 
