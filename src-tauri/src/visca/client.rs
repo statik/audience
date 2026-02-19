@@ -136,28 +136,110 @@ impl PtzController for ViscaClient {
     }
 
     async fn get_position(&self) -> Result<PtzPosition, PtzError> {
-        // Query pan/tilt and zoom positions
-        let _pt_response = self
+        let pt_response = self
             .send_command(&commands::pan_tilt_position_inquiry())
             .await?;
-        let _zoom_response = self
+        let zoom_response = self
             .send_command(&commands::zoom_position_inquiry())
             .await?;
 
-        // Parse responses — in production, decode the VISCA nibble format
-        // For now return default; real implementation would parse response bytes
+        // Strip 8-byte VISCA-over-IP header to get the VISCA payload
+        let pt_payload = if pt_response.len() > 8 {
+            &pt_response[8..]
+        } else {
+            &pt_response
+        };
+        let z_payload = if zoom_response.len() > 8 {
+            &zoom_response[8..]
+        } else {
+            &zoom_response
+        };
+
+        let (visca_pan, visca_tilt) = commands::parse_pan_tilt_response(pt_payload).ok_or(
+            PtzError::ProtocolError("Invalid pan/tilt inquiry response".into()),
+        )?;
+        let visca_zoom = commands::parse_zoom_response(z_payload).ok_or(
+            PtzError::ProtocolError("Invalid zoom inquiry response".into()),
+        )?;
+
         Ok(PtzPosition {
-            pan: 0.0,
-            tilt: 0.0,
-            zoom: 0.0,
+            pan: commands::visca_pan_to_normalized(visca_pan),
+            tilt: commands::visca_tilt_to_normalized(visca_tilt),
+            zoom: commands::visca_zoom_to_normalized(visca_zoom),
         })
     }
 
     async fn test_connection(&self) -> Result<(), PtzError> {
         self.ensure_connected().await?;
-        // Send a position inquiry as a connectivity test
         let cmd = commands::pan_tilt_position_inquiry();
         self.send_command(&cmd).await?;
+        Ok(())
+    }
+
+    async fn home(&self) -> Result<(), PtzError> {
+        self.send_command(&commands::pan_tilt_home()).await?;
+        Ok(())
+    }
+
+    async fn continuous_move(&self, pan_speed: f64, tilt_speed: f64) -> Result<(), PtzError> {
+        if pan_speed.abs() < 0.01 && tilt_speed.abs() < 0.01 {
+            return self.stop().await;
+        }
+        let ps = ((pan_speed.abs() * 24.0).ceil() as u8).clamp(1, 24);
+        let ts = ((tilt_speed.abs() * 23.0).ceil() as u8).clamp(1, 23);
+        let pd = if pan_speed < -0.01 {
+            0x01
+        } else if pan_speed > 0.01 {
+            0x02
+        } else {
+            0x03
+        };
+        let td = if tilt_speed > 0.01 {
+            0x01
+        } else if tilt_speed < -0.01 {
+            0x02
+        } else {
+            0x03
+        };
+        let cmd = commands::pan_tilt_relative(ps, ts, pd, td);
+        self.send_command(&cmd).await?;
+        Ok(())
+    }
+
+    async fn stop(&self) -> Result<(), PtzError> {
+        self.send_command(&commands::pan_tilt_stop()).await?;
+        Ok(())
+    }
+
+    async fn focus_continuous(&self, speed: f64) -> Result<(), PtzError> {
+        let cmd = if speed > 0.01 {
+            commands::focus_far()
+        } else if speed < -0.01 {
+            commands::focus_near()
+        } else {
+            commands::focus_stop()
+        };
+        self.send_command(&cmd).await?;
+        Ok(())
+    }
+
+    async fn set_autofocus(&self, enabled: bool) -> Result<(), PtzError> {
+        let cmd = if enabled {
+            commands::autofocus_on()
+        } else {
+            commands::autofocus_off()
+        };
+        self.send_command(&cmd).await?;
+        Ok(())
+    }
+
+    async fn autofocus_trigger(&self) -> Result<(), PtzError> {
+        self.send_command(&commands::autofocus_trigger()).await?;
+        Ok(())
+    }
+
+    async fn focus_stop(&self) -> Result<(), PtzError> {
+        self.send_command(&commands::focus_stop()).await?;
         Ok(())
     }
 }

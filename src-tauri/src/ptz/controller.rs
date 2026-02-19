@@ -25,6 +25,43 @@ pub trait PtzController: Send + Sync {
 
     /// Test connectivity to the camera.
     async fn test_connection(&self) -> Result<(), PtzError>;
+
+    /// Move to the home/center position.
+    async fn home(&self) -> Result<(), PtzError> {
+        self.move_absolute(0.0, 0.0, 0.0).await
+    }
+
+    /// Start continuous pan/tilt movement at a given velocity.
+    /// pan_speed: -1.0 (left) to 1.0 (right), 0 = stop pan.
+    /// tilt_speed: -1.0 (down) to 1.0 (up), 0 = stop tilt.
+    async fn continuous_move(&self, _pan_speed: f64, _tilt_speed: f64) -> Result<(), PtzError> {
+        Ok(())
+    }
+
+    /// Stop all movement.
+    async fn stop(&self) -> Result<(), PtzError> {
+        Ok(())
+    }
+
+    /// Start continuous focus movement. speed: negative = near, positive = far.
+    async fn focus_continuous(&self, _speed: f64) -> Result<(), PtzError> {
+        Ok(())
+    }
+
+    /// Toggle autofocus on or off.
+    async fn set_autofocus(&self, _enabled: bool) -> Result<(), PtzError> {
+        Ok(())
+    }
+
+    /// One-push autofocus trigger.
+    async fn autofocus_trigger(&self) -> Result<(), PtzError> {
+        Ok(())
+    }
+
+    /// Stop focus movement.
+    async fn focus_stop(&self) -> Result<(), PtzError> {
+        Ok(())
+    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -99,6 +136,36 @@ impl PtzDispatcher {
 
     pub async fn test_connection(&self) -> Result<(), PtzError> {
         self.get_controller()?.test_connection().await
+    }
+
+    pub async fn home(&self) -> Result<(), PtzError> {
+        self.get_controller()?.home().await
+    }
+
+    pub async fn continuous_move(&self, pan_speed: f64, tilt_speed: f64) -> Result<(), PtzError> {
+        self.get_controller()?
+            .continuous_move(pan_speed, tilt_speed)
+            .await
+    }
+
+    pub async fn stop(&self) -> Result<(), PtzError> {
+        self.get_controller()?.stop().await
+    }
+
+    pub async fn focus_continuous(&self, speed: f64) -> Result<(), PtzError> {
+        self.get_controller()?.focus_continuous(speed).await
+    }
+
+    pub async fn set_autofocus(&self, enabled: bool) -> Result<(), PtzError> {
+        self.get_controller()?.set_autofocus(enabled).await
+    }
+
+    pub async fn autofocus_trigger(&self) -> Result<(), PtzError> {
+        self.get_controller()?.autofocus_trigger().await
+    }
+
+    pub async fn focus_stop(&self) -> Result<(), PtzError> {
+        self.get_controller()?.focus_stop().await
     }
 }
 

@@ -135,6 +135,108 @@ pub async fn ptz_store_preset(
     Ok(())
 }
 
+/// Move the camera to its home/center position.
+#[tauri::command]
+pub async fn ptz_home(state: tauri::State<'_, AppState>) -> Result<(), String> {
+    let mut pos = state.current_position.lock().await;
+    pos.pan = 0.0;
+    pos.tilt = 0.0;
+    pos.zoom = 0.0;
+    drop(pos);
+
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher.home().await.map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
+/// Start continuous pan/tilt movement at a given velocity.
+#[tauri::command]
+pub async fn ptz_continuous_move(
+    state: tauri::State<'_, AppState>,
+    pan_speed: f64,
+    tilt_speed: f64,
+) -> Result<(), String> {
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher
+            .continuous_move(pan_speed, tilt_speed)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
+/// Stop all camera movement.
+#[tauri::command]
+pub async fn ptz_stop(state: tauri::State<'_, AppState>) -> Result<(), String> {
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher.stop().await.map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
+/// Start continuous focus movement. Negative = near, positive = far.
+#[tauri::command]
+pub async fn ptz_focus(state: tauri::State<'_, AppState>, speed: f64) -> Result<(), String> {
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher
+            .focus_continuous(speed)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
+/// Stop focus movement.
+#[tauri::command]
+pub async fn ptz_focus_stop(state: tauri::State<'_, AppState>) -> Result<(), String> {
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher.focus_stop().await.map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
+/// Toggle autofocus on or off.
+#[tauri::command]
+pub async fn ptz_set_autofocus(
+    state: tauri::State<'_, AppState>,
+    enabled: bool,
+) -> Result<(), String> {
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher
+            .set_autofocus(enabled)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
+/// One-push autofocus trigger.
+#[tauri::command]
+pub async fn ptz_autofocus_trigger(state: tauri::State<'_, AppState>) -> Result<(), String> {
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    if dispatcher.has_controller() {
+        dispatcher
+            .autofocus_trigger()
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+
+    Ok(())
+}
+
 /// Get the current PTZ position.
 #[tauri::command]
 pub async fn ptz_get_position(state: tauri::State<'_, AppState>) -> Result<PtzPosition, String> {

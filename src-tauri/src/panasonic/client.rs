@@ -139,22 +139,59 @@ impl PtzController for PanasonicClient {
     }
 
     async fn get_position(&self) -> Result<PtzPosition, PtzError> {
-        // Query current position: #APC returns current pan/tilt
-        let response = self.send_ptz_command("APC").await?;
+        let pt_response = self.send_ptz_command("APC").await?;
+        let z_response = self.send_ptz_command("GZ").await?;
 
-        // Parse response — format: "aPC[pan_hex][tilt_hex]"
-        // For now return default; real implementation would parse
-        let _ = response;
+        // Parse "aPC[PPPPTTTT]" — 4 hex chars pan, 4 hex chars tilt
+        let (pan, tilt) = if pt_response.starts_with("aPC") && pt_response.len() >= 11 {
+            let pan_hex = &pt_response[3..7];
+            let tilt_hex = &pt_response[7..11];
+            let pan_val = u16::from_str_radix(pan_hex, 16)
+                .map_err(|e| PtzError::ProtocolError(e.to_string()))?;
+            let tilt_val = u16::from_str_radix(tilt_hex, 16)
+                .map_err(|e| PtzError::ProtocolError(e.to_string()))?;
+            // Reverse: val = ((norm+1)/2 * 0xFFFE) + 1
+            let pan_norm = (pan_val as f64 - 1.0) / 0xFFFE_u16 as f64 * 2.0 - 1.0;
+            let tilt_norm = (tilt_val as f64 - 1.0) / 0xFFFE_u16 as f64 * 2.0 - 1.0;
+            (pan_norm, tilt_norm)
+        } else {
+            return Err(PtzError::ProtocolError(format!(
+                "Invalid APC response: {pt_response}"
+            )));
+        };
+
+        // Parse "gz[ZZZ]" — 3 hex chars zoom
+        let zoom = if z_response.starts_with("gz") && z_response.len() >= 5 {
+            let zoom_hex = &z_response[2..5];
+            let zoom_val = u16::from_str_radix(zoom_hex, 16)
+                .map_err(|e| PtzError::ProtocolError(e.to_string()))?;
+            (zoom_val as f64 - 0x555_u16 as f64) / (0xFFF_u16 - 0x555_u16) as f64
+        } else {
+            0.0
+        };
+
         Ok(PtzPosition {
-            pan: 0.0,
-            tilt: 0.0,
-            zoom: 0.0,
+            pan: pan.clamp(-1.0, 1.0),
+            tilt: tilt.clamp(-1.0, 1.0),
+            zoom: zoom.clamp(0.0, 1.0),
         })
     }
 
     async fn test_connection(&self) -> Result<(), PtzError> {
-        // Query position as connectivity test
         self.send_ptz_command("APC").await?;
+        Ok(())
+    }
+
+    async fn continuous_move(&self, pan_speed: f64, tilt_speed: f64) -> Result<(), PtzError> {
+        let ps = Self::delta_to_speed(pan_speed);
+        let ts = Self::delta_to_speed(tilt_speed);
+        let cmd = format!("PTS{}{}", ps, ts);
+        self.send_ptz_command(&cmd).await?;
+        Ok(())
+    }
+
+    async fn stop(&self) -> Result<(), PtzError> {
+        self.send_ptz_command("PTS5050").await?;
         Ok(())
     }
 }

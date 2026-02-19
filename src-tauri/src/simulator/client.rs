@@ -115,6 +115,21 @@ impl PtzController for SimulatedController {
     async fn test_connection(&self) -> Result<(), PtzError> {
         Ok(())
     }
+
+    async fn continuous_move(&self, pan_speed: f64, tilt_speed: f64) -> Result<(), PtzError> {
+        // In simulation, apply a small step proportional to speed
+        let mut pos = self
+            .position
+            .lock()
+            .map_err(|e| PtzError::CommandFailed(format!("Lock poisoned: {e}")))?;
+        pos.pan = clamp_pan_tilt(pos.pan + pan_speed * 0.05);
+        pos.tilt = clamp_pan_tilt(pos.tilt + tilt_speed * 0.05);
+        Ok(())
+    }
+
+    async fn stop(&self) -> Result<(), PtzError> {
+        Ok(())
+    }
 }
 
 #[cfg(test)]
