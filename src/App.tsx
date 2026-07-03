@@ -13,6 +13,7 @@ import { usePresets } from "./hooks/usePresets";
 import { useEndpoints } from "./hooks/useEndpoints";
 import { useSettings } from "./hooks/useSettings";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { usePtzHealth } from "./hooks/usePtzHealth";
 
 export default function App() {
   const sidebarCollapsed = useAppStore((s) => s.sidebarCollapsed);
@@ -23,6 +24,7 @@ export default function App() {
   const { loadSettings } = useSettings();
 
   useKeyboardShortcuts();
+  usePtzHealth();
 
   useEffect(() => {
     loadSettings();
