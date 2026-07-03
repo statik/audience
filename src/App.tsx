@@ -6,6 +6,7 @@ import { PtzControls } from "./components/PtzControls";
 import { EndpointManager } from "./components/EndpointManager";
 import { StatusBar } from "./components/StatusBar";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { ToastHost } from "./components/ToastHost";
 import { useAppStore } from "./store/app-store";
 import { usePresets } from "./hooks/usePresets";
 import { useEndpoints } from "./hooks/useEndpoints";
@@ -57,6 +58,7 @@ export default function App() {
       </div>
 
       <StatusBar />
+      <ToastHost />
 
       {settingsOpen && <SettingsPanel />}
     </div>

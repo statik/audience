@@ -26,6 +26,8 @@ describe("app-store", () => {
       isConnected: false,
       fps: 0,
       connectionLabel: "No source selected",
+      ptzStatus: "idle",
+      toasts: [],
     });
   });
 
@@ -148,6 +150,73 @@ describe("app-store", () => {
     it("sets connection label", () => {
       useAppStore.getState().setConnectionLabel("NDI - Camera 1");
       expect(useAppStore.getState().connectionLabel).toBe("NDI - Camera 1");
+    });
+  });
+
+  describe("ptzStatus", () => {
+    it("starts idle", () => {
+      expect(useAppStore.getState().ptzStatus).toBe("idle");
+    });
+
+    it("tracks command outcomes", () => {
+      useAppStore.getState().setPtzStatus("ok");
+      expect(useAppStore.getState().ptzStatus).toBe("ok");
+      useAppStore.getState().setPtzStatus("error");
+      expect(useAppStore.getState().ptzStatus).toBe("error");
+    });
+  });
+
+  describe("toasts", () => {
+    it("starts empty", () => {
+      expect(useAppStore.getState().toasts).toEqual([]);
+    });
+
+    it("pushes a toast with a generated id", () => {
+      useAppStore.getState().pushToast({ kind: "error", message: "boom" });
+      const toasts = useAppStore.getState().toasts;
+      expect(toasts).toHaveLength(1);
+      expect(toasts[0].message).toBe("boom");
+      expect(toasts[0].id).toBeTruthy();
+    });
+
+    it("stacks unkeyed toasts", () => {
+      useAppStore.getState().pushToast({ kind: "error", message: "one" });
+      useAppStore.getState().pushToast({ kind: "error", message: "two" });
+      expect(useAppStore.getState().toasts).toHaveLength(2);
+    });
+
+    it("replaces same-key toasts instead of stacking", () => {
+      useAppStore.getState().pushToast({ key: "ptz", kind: "error", message: "one" });
+      const firstId = useAppStore.getState().toasts[0].id;
+      useAppStore.getState().pushToast({ key: "ptz", kind: "error", message: "two" });
+      const toasts = useAppStore.getState().toasts;
+      expect(toasts).toHaveLength(1);
+      expect(toasts[0].message).toBe("two");
+      // Fresh id so the auto-dismiss timer restarts
+      expect(toasts[0].id).not.toBe(firstId);
+    });
+
+    it("keeps toasts with different keys separate", () => {
+      useAppStore.getState().pushToast({ key: "a", kind: "error", message: "one" });
+      useAppStore.getState().pushToast({ key: "b", kind: "error", message: "two" });
+      expect(useAppStore.getState().toasts).toHaveLength(2);
+    });
+
+    it("dismisses a toast by id", () => {
+      useAppStore.getState().pushToast({ kind: "success", message: "saved" });
+      const id = useAppStore.getState().toasts[0].id;
+      useAppStore.getState().dismissToast(id);
+      expect(useAppStore.getState().toasts).toEqual([]);
+    });
+
+    it("caps the number of visible toasts", () => {
+      for (let i = 0; i < 10; i++) {
+        useAppStore.getState().pushToast({ kind: "info", message: `t${i}` });
+      }
+      const toasts = useAppStore.getState().toasts;
+      expect(toasts).toHaveLength(5);
+      // Oldest are dropped, newest kept
+      expect(toasts[toasts.length - 1].message).toBe("t9");
     });
   });
 

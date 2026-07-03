@@ -68,6 +68,18 @@ export interface AppSettings {
   video_source?: VideoSourceConfig;
 }
 
+/** Kind of a transient notification toast. */
+export type ToastKind = "error" | "warning" | "success" | "info";
+
+/** A transient notification shown by the toast host. */
+export interface Toast {
+  id: string;
+  /** Toasts with the same key replace each other instead of stacking. */
+  key?: string;
+  kind: ToastKind;
+  message: string;
+}
+
 /** NDI source descriptor. */
 export interface NdiSource {
   name: string;

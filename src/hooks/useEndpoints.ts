@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "../store/app-store";
+import { notifyError } from "../utils/notify";
 import type { CameraEndpoint, ProtocolConfig } from "@shared/types";
 
 export function useEndpoints() {
@@ -15,6 +16,7 @@ export function useEndpoints() {
       setEndpoints(result);
     } catch (err) {
       console.error("Failed to load endpoints:", err);
+      notifyError("Failed to load endpoints", err);
     }
   }, [setEndpoints]);
 
@@ -29,6 +31,7 @@ export function useEndpoints() {
         return created;
       } catch (err) {
         console.error("Failed to create endpoint:", err);
+        notifyError("Failed to create endpoint", err);
         throw err;
       }
     },
@@ -46,6 +49,7 @@ export function useEndpoints() {
         return updated;
       } catch (err) {
         console.error("Failed to update endpoint:", err);
+        notifyError("Failed to update endpoint", err);
         throw err;
       }
     },
@@ -63,6 +67,7 @@ export function useEndpoints() {
         }
       } catch (err) {
         console.error("Failed to delete endpoint:", err);
+        notifyError("Failed to delete endpoint", err);
         throw err;
       }
     },
@@ -74,8 +79,10 @@ export function useEndpoints() {
       try {
         await invoke("set_active_endpoint", { endpointId });
         setActiveEndpointId(endpointId);
+        useAppStore.getState().setPtzStatus("idle");
       } catch (err) {
         console.error("Failed to set active endpoint:", err);
+        notifyError("Failed to activate endpoint", err);
         throw err;
       }
     },
@@ -86,8 +93,10 @@ export function useEndpoints() {
     try {
       await invoke("clear_active_endpoint");
       setActiveEndpointId(null);
+      useAppStore.getState().setPtzStatus("idle");
     } catch (err) {
       console.error("Failed to clear active endpoint:", err);
+      notifyError("Failed to deactivate endpoint", err);
       throw err;
     }
   }, [setActiveEndpointId]);
