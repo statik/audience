@@ -1,5 +1,18 @@
 use super::types::PtzPosition;
 use async_trait::async_trait;
+use serde::Serialize;
+
+/// What the active protocol implementation actually supports.
+///
+/// Conservative by default: the focus methods below have silent no-op
+/// default implementations, so a controller must override
+/// `capabilities()` alongside them to advertise support. The UI uses
+/// this to disable controls that would otherwise silently do nothing.
+#[derive(Debug, Clone, Copy, Default, Serialize)]
+pub struct PtzCapabilities {
+    pub focus: bool,
+    pub autofocus: bool,
+}
 
 /// Protocol-agnostic PTZ controller trait.
 /// All protocol implementations (NDI, VISCA, Panasonic AW, BirdDog) implement this.
@@ -61,6 +74,11 @@ pub trait PtzController: Send + Sync {
     /// Stop focus movement.
     async fn focus_stop(&self) -> Result<(), PtzError> {
         Ok(())
+    }
+
+    /// Which optional operations this controller genuinely implements.
+    fn capabilities(&self) -> PtzCapabilities {
+        PtzCapabilities::default()
     }
 }
 
@@ -167,10 +185,73 @@ impl PtzDispatcher {
     pub async fn focus_stop(&self) -> Result<(), PtzError> {
         self.get_controller()?.focus_stop().await
     }
+
+    /// Capabilities of the active controller; nothing when none is active.
+    pub fn capabilities(&self) -> PtzCapabilities {
+        self.controller
+            .as_deref()
+            .map(|c| c.capabilities())
+            .unwrap_or_default()
+    }
 }
 
 impl Default for PtzDispatcher {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::birddog::client::BirdDogClient;
+    use crate::panasonic::client::PanasonicClient;
+    use crate::simulator::client::SimulatedController;
+    use crate::visca::client::ViscaClient;
+
+    #[test]
+    fn visca_advertises_focus() {
+        let client = ViscaClient::new("127.0.0.1", 52381).unwrap();
+        let caps = client.capabilities();
+        assert!(caps.focus);
+        assert!(caps.autofocus);
+    }
+
+    #[test]
+    fn simulated_advertises_focus() {
+        let caps = SimulatedController::new().capabilities();
+        assert!(caps.focus);
+        assert!(caps.autofocus);
+    }
+
+    #[test]
+    fn panasonic_does_not_advertise_focus() {
+        let client = PanasonicClient::new("127.0.0.1", 80).unwrap();
+        let caps = client.capabilities();
+        assert!(!caps.focus);
+        assert!(!caps.autofocus);
+    }
+
+    #[test]
+    fn birddog_does_not_advertise_focus() {
+        let client = BirdDogClient::new("127.0.0.1", 8080).unwrap();
+        let caps = client.capabilities();
+        assert!(!caps.focus);
+        assert!(!caps.autofocus);
+    }
+
+    #[test]
+    fn dispatcher_without_controller_advertises_nothing() {
+        let dispatcher = PtzDispatcher::new();
+        let caps = dispatcher.capabilities();
+        assert!(!caps.focus);
+        assert!(!caps.autofocus);
+    }
+
+    #[test]
+    fn dispatcher_passes_through_controller_capabilities() {
+        let mut dispatcher = PtzDispatcher::new();
+        dispatcher.set_controller(Box::new(SimulatedController::new()));
+        assert!(dispatcher.capabilities().focus);
     }
 }

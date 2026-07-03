@@ -3,7 +3,7 @@ use std::sync::Mutex;
 
 use async_trait::async_trait;
 
-use crate::ptz::controller::{PtzController, PtzError};
+use crate::ptz::controller::{PtzCapabilities, PtzController, PtzError};
 use crate::ptz::types::PtzPosition;
 
 /// Simulated PTZ camera for development and demo use.
@@ -129,6 +129,15 @@ impl PtzController for SimulatedController {
 
     async fn stop(&self) -> Result<(), PtzError> {
         Ok(())
+    }
+
+    // The inherited focus no-ops succeed, so advertising focus keeps the
+    // full UI path exercisable without camera hardware.
+    fn capabilities(&self) -> PtzCapabilities {
+        PtzCapabilities {
+            focus: true,
+            autofocus: true,
+        }
     }
 }
 

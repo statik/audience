@@ -198,6 +198,14 @@ export function EndpointManager() {
             </select>
           </div>
 
+          {/* NDI PTZ control is a stub without the NDI SDK */}
+          {editingEndpoint.config.type === "Ndi" && (
+            <div className="text-xs p-2 rounded bg-[var(--color-warning)]/10 text-[var(--color-warning)] border border-[var(--color-warning)]/30">
+              NDI PTZ control requires the NDI SDK, which is not linked in
+              this build. Camera movement commands will have no effect.
+            </div>
+          )}
+
           {/* Protocol-specific fields */}
           {editingEndpoint.config.type !== "Ndi" &&
             "host" in editingEndpoint.config && (

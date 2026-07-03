@@ -5,6 +5,7 @@ import type {
   CameraEndpoint,
   Preset,
   PresetProfile,
+  PtzCapabilities,
   PtzPosition,
   Toast,
   VideoSource,
@@ -49,6 +50,14 @@ interface AppState {
   // PTZ position
   currentPosition: PtzPosition;
   setCurrentPosition: (pos: PtzPosition) => void;
+
+  // PTZ capabilities of the active endpoint
+  ptzCapabilities: PtzCapabilities | null;
+  setPtzCapabilities: (caps: PtzCapabilities | null) => void;
+
+  // Autofocus state (assumed on; cameras default to AF)
+  afEnabled: boolean;
+  setAfEnabled: (enabled: boolean) => void;
 
   // Settings
   settings: AppSettings;
@@ -108,6 +117,14 @@ export const useAppStore = create<AppState>((set) => ({
   // PTZ position
   currentPosition: { pan: 0, tilt: 0, zoom: 0 },
   setCurrentPosition: (currentPosition) => set({ currentPosition }),
+
+  // PTZ capabilities
+  ptzCapabilities: null,
+  setPtzCapabilities: (ptzCapabilities) => set({ ptzCapabilities }),
+
+  // Autofocus
+  afEnabled: true,
+  setAfEnabled: (afEnabled) => set({ afEnabled }),
 
   // Settings
   settings: {

@@ -1,3 +1,4 @@
+use crate::ptz::controller::PtzCapabilities;
 use crate::ptz::types::PtzPosition;
 use crate::AppState;
 
@@ -235,6 +236,15 @@ pub async fn ptz_autofocus_trigger(state: tauri::State<'_, AppState>) -> Result<
     }
 
     Ok(())
+}
+
+/// Get the capabilities of the active PTZ controller (all false when none).
+#[tauri::command]
+pub async fn ptz_get_capabilities(
+    state: tauri::State<'_, AppState>,
+) -> Result<PtzCapabilities, String> {
+    let dispatcher = state.ptz_dispatcher.lock().await;
+    Ok(dispatcher.capabilities())
 }
 
 /// Get the current PTZ position.

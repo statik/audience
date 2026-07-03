@@ -2,7 +2,21 @@ import { useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "../store/app-store";
 import { notifyError } from "../utils/notify";
-import type { CameraEndpoint, ProtocolConfig } from "@shared/types";
+import type {
+  CameraEndpoint,
+  ProtocolConfig,
+  PtzCapabilities,
+} from "@shared/types";
+
+async function refreshCapabilities() {
+  try {
+    const caps = await invoke<PtzCapabilities>("ptz_get_capabilities");
+    useAppStore.getState().setPtzCapabilities(caps);
+  } catch (err) {
+    console.error("Failed to fetch PTZ capabilities:", err);
+    useAppStore.getState().setPtzCapabilities(null);
+  }
+}
 
 export function useEndpoints() {
   const endpoints = useAppStore((s) => s.endpoints);
@@ -64,6 +78,8 @@ export function useEndpoints() {
         setEndpoints(latest.filter((e) => e.id !== endpointId));
         if (useAppStore.getState().activeEndpointId === endpointId) {
           setActiveEndpointId(null);
+          useAppStore.getState().setPtzStatus("idle");
+          useAppStore.getState().setPtzCapabilities(null);
         }
       } catch (err) {
         console.error("Failed to delete endpoint:", err);
@@ -80,6 +96,7 @@ export function useEndpoints() {
         await invoke("set_active_endpoint", { endpointId });
         setActiveEndpointId(endpointId);
         useAppStore.getState().setPtzStatus("idle");
+        await refreshCapabilities();
       } catch (err) {
         console.error("Failed to set active endpoint:", err);
         notifyError("Failed to activate endpoint", err);
@@ -94,6 +111,7 @@ export function useEndpoints() {
       await invoke("clear_active_endpoint");
       setActiveEndpointId(null);
       useAppStore.getState().setPtzStatus("idle");
+      useAppStore.getState().setPtzCapabilities(null);
     } catch (err) {
       console.error("Failed to clear active endpoint:", err);
       notifyError("Failed to deactivate endpoint", err);

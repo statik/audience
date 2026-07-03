@@ -22,6 +22,15 @@ export type ProtocolConfig =
   | { type: "BirdDogRest"; host: string; port: number }
   | { type: "Simulated" };
 
+/**
+ * Optional operations the active protocol implementation supports.
+ * Mirrors `PtzCapabilities` in src-tauri/src/ptz/controller.rs.
+ */
+export interface PtzCapabilities {
+  focus: boolean;
+  autofocus: boolean;
+}
+
 /** A camera endpoint for PTZ control. */
 export interface CameraEndpoint {
   id: string;

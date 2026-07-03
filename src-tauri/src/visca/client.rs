@@ -1,4 +1,4 @@
-use crate::ptz::controller::{PtzController, PtzError};
+use crate::ptz::controller::{PtzCapabilities, PtzController, PtzError};
 use crate::ptz::types::PtzPosition;
 use async_trait::async_trait;
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -241,5 +241,12 @@ impl PtzController for ViscaClient {
     async fn focus_stop(&self) -> Result<(), PtzError> {
         self.send_command(&commands::focus_stop()).await?;
         Ok(())
+    }
+
+    fn capabilities(&self) -> PtzCapabilities {
+        PtzCapabilities {
+            focus: true,
+            autofocus: true,
+        }
     }
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAppStore } from "../store/app-store";
 import { usePtzControl } from "../hooks/usePtzControl";
 import { JoystickPad } from "./JoystickPad";
 
@@ -25,8 +26,15 @@ export function PtzControls() {
   } = usePtzControl();
 
   const [speed, setSpeed] = useState<SpeedPreset>("normal");
-  const [afEnabled, setAfEnabled] = useState(true);
   const [controlMode, setControlMode] = useState<"dpad" | "joystick">("dpad");
+  const afEnabled = useAppStore((s) => s.afEnabled);
+  const setAfEnabled = useAppStore((s) => s.setAfEnabled);
+  const capabilities = useAppStore((s) => s.ptzCapabilities);
+
+  const focusSupported = capabilities?.focus ?? false;
+  const focusTitle = focusSupported
+    ? undefined
+    : "Focus not supported by this camera protocol";
 
   const getStep = (e: React.MouseEvent) => {
     if (e.shiftKey) return STEP_MAP.fine;
@@ -169,14 +177,16 @@ export function PtzControls() {
         </div>
       </div>
 
-      {/* Focus controls */}
+      {/* Focus controls — disabled for protocols that can't focus */}
       <div className="mt-3">
         <div className="flex items-center justify-between mb-1">
           <span className="text-xs text-[var(--color-text-muted)]">Focus</span>
         </div>
         <div className="flex items-center gap-1 justify-center">
           <button
-            className="px-2 py-1 text-xs bg-[var(--color-bg-card)] text-[var(--color-text)] rounded hover:bg-[var(--color-primary)] transition-colors"
+            className="px-2 py-1 text-xs bg-[var(--color-bg-card)] text-[var(--color-text)] rounded hover:bg-[var(--color-primary)] transition-colors disabled:opacity-50 disabled:hover:bg-[var(--color-bg-card)]"
+            disabled={!focusSupported}
+            title={focusTitle}
             onPointerDown={() => focusContinuous(-1)}
             onPointerUp={() => focusStop()}
             onPointerLeave={() => focusStop()}
@@ -184,17 +194,22 @@ export function PtzControls() {
             Near
           </button>
           <button
-            className={`px-2 py-1 text-xs rounded transition-colors ${
-              afEnabled
+            className={`px-2 py-1 text-xs rounded transition-colors disabled:opacity-50 ${
+              afEnabled && focusSupported
                 ? "bg-[var(--color-primary)] text-white"
                 : "bg-[var(--color-bg-card)] text-[var(--color-text)]"
             }`}
+            disabled={!focusSupported}
+            title={focusTitle}
+            aria-pressed={afEnabled}
             onClick={toggleAf}
           >
             AF
           </button>
           <button
-            className="px-2 py-1 text-xs bg-[var(--color-bg-card)] text-[var(--color-text)] rounded hover:bg-[var(--color-primary)] transition-colors"
+            className="px-2 py-1 text-xs bg-[var(--color-bg-card)] text-[var(--color-text)] rounded hover:bg-[var(--color-primary)] transition-colors disabled:opacity-50 disabled:hover:bg-[var(--color-bg-card)]"
+            disabled={!focusSupported}
+            title={focusTitle}
             onPointerDown={() => focusContinuous(1)}
             onPointerUp={() => focusStop()}
             onPointerLeave={() => focusStop()}

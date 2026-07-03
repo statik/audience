@@ -87,6 +87,7 @@ pub fn run() {
             commands::ptz::ptz_focus_stop,
             commands::ptz::ptz_set_autofocus,
             commands::ptz::ptz_autofocus_trigger,
+            commands::ptz::ptz_get_capabilities,
             commands::presets::get_all_presets,
             commands::presets::create_preset,
             commands::presets::update_preset,
