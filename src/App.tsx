@@ -9,6 +9,7 @@ import { SettingsPanel } from "./components/SettingsPanel";
 import { useAppStore } from "./store/app-store";
 import { usePresets } from "./hooks/usePresets";
 import { useEndpoints } from "./hooks/useEndpoints";
+import { useSettings } from "./hooks/useSettings";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 
 export default function App() {
@@ -16,13 +17,15 @@ export default function App() {
   const settingsOpen = useAppStore((s) => s.settingsOpen);
   const { loadPresets } = usePresets();
   const { loadEndpoints } = useEndpoints();
+  const { loadSettings } = useSettings();
 
   useKeyboardShortcuts();
 
   useEffect(() => {
+    loadSettings();
     loadPresets();
     loadEndpoints();
-  }, [loadPresets, loadEndpoints]);
+  }, [loadSettings, loadPresets, loadEndpoints]);
 
   return (
     <div className="flex flex-col h-screen w-screen bg-[var(--color-bg-dark)]">

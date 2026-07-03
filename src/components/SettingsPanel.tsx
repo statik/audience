@@ -1,23 +1,9 @@
-import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "../store/app-store";
+import { useSettings } from "../hooks/useSettings";
 
 export function SettingsPanel() {
-  const settings = useAppStore((s) => s.settings);
-  const setSettings = useAppStore((s) => s.setSettings);
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen);
-
-  const updateSetting = async (key: string, value: number) => {
-    if (!Number.isFinite(value)) return;
-    const previousSettings = settings;
-    const newSettings = { ...settings, [key]: value };
-    setSettings(newSettings);
-    try {
-      await invoke("update_settings", { [key]: value });
-    } catch (err) {
-      console.error("Failed to save settings:", err);
-      setSettings(previousSettings);
-    }
-  };
+  const { settings, updateSetting } = useSettings();
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
