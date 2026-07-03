@@ -19,6 +19,7 @@ export function Toolbar() {
               : "bg-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           }`}
           onClick={() => setMode("calibration")}
+          aria-pressed={mode === "calibration"}
         >
           Calibration
         </button>
@@ -29,6 +30,7 @@ export function Toolbar() {
               : "bg-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
           }`}
           onClick={() => setMode("operation")}
+          aria-pressed={mode === "operation"}
         >
           Operation
         </button>

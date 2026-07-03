@@ -68,6 +68,8 @@ interface AppState {
   toggleSidebar: () => void;
   settingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
+  shortcutsHelpOpen: boolean;
+  setShortcutsHelpOpen: (open: boolean) => void;
 
   // Connection
   isConnected: boolean;
@@ -141,6 +143,8 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
   settingsOpen: false,
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
+  shortcutsHelpOpen: false,
+  setShortcutsHelpOpen: (shortcutsHelpOpen) => set({ shortcutsHelpOpen }),
 
   // Connection
   isConnected: false,

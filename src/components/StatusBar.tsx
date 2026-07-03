@@ -21,6 +21,7 @@ export function StatusBar() {
   const ptzStatus = useAppStore((s) => s.ptzStatus);
   const endpoints = useAppStore((s) => s.endpoints);
   const activeEndpointId = useAppStore((s) => s.activeEndpointId);
+  const setShortcutsHelpOpen = useAppStore((s) => s.setShortcutsHelpOpen);
 
   const activeEndpoint = endpoints.find((e) => e.id === activeEndpointId);
 
@@ -59,6 +60,13 @@ export function StatusBar() {
           Mode: {mode === "calibration" ? "Calibration" : "Operation"}
         </span>
         {isConnected && <span>FPS: {fps}</span>}
+        <button
+          className="hover:text-[var(--color-text)] transition-colors"
+          onClick={() => setShortcutsHelpOpen(true)}
+          title="Keyboard shortcuts"
+        >
+          Shortcuts (?)
+        </button>
       </div>
     </div>
   );

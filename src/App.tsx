@@ -6,6 +6,7 @@ import { PtzControls } from "./components/PtzControls";
 import { EndpointManager } from "./components/EndpointManager";
 import { StatusBar } from "./components/StatusBar";
 import { SettingsPanel } from "./components/SettingsPanel";
+import { ShortcutsHelp } from "./components/ShortcutsHelp";
 import { ToastHost } from "./components/ToastHost";
 import { useAppStore } from "./store/app-store";
 import { usePresets } from "./hooks/usePresets";
@@ -16,6 +17,7 @@ import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 export default function App() {
   const sidebarCollapsed = useAppStore((s) => s.sidebarCollapsed);
   const settingsOpen = useAppStore((s) => s.settingsOpen);
+  const shortcutsHelpOpen = useAppStore((s) => s.shortcutsHelpOpen);
   const { loadPresets } = usePresets();
   const { loadEndpoints } = useEndpoints();
   const { loadSettings } = useSettings();
@@ -61,6 +63,7 @@ export default function App() {
       <ToastHost />
 
       {settingsOpen && <SettingsPanel />}
+      {shortcutsHelpOpen && <ShortcutsHelp />}
     </div>
   );
 }

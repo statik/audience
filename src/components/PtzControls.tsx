@@ -62,6 +62,7 @@ export function PtzControls() {
                 : "bg-[var(--color-bg-card)] text-[var(--color-text-muted)]"
             }`}
             onClick={() => setControlMode("dpad")}
+            aria-pressed={controlMode === "dpad"}
           >
             D-Pad
           </button>
@@ -72,6 +73,7 @@ export function PtzControls() {
                 : "bg-[var(--color-bg-card)] text-[var(--color-text-muted)]"
             }`}
             onClick={() => setControlMode("joystick")}
+            aria-pressed={controlMode === "joystick"}
           >
             Stick
           </button>
@@ -91,6 +93,7 @@ export function PtzControls() {
                     : "bg-[var(--color-bg-card)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                 }`}
                 onClick={() => setSpeed(s)}
+                aria-pressed={speed === s}
               >
                 {s.charAt(0).toUpperCase() + s.slice(1)}
               </button>

@@ -54,31 +54,37 @@ export function PresetList() {
         {presets.map((preset) => (
           <div
             key={preset.id}
-            className={`group flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors ${
+            className={`group flex items-center rounded transition-colors ${
               activePresetId === preset.id
                 ? "bg-[var(--color-bg-card)] ring-1 ring-[var(--color-primary)]"
                 : "hover:bg-[var(--color-bg-card)]"
             }`}
-            onClick={() => handlePresetClick(preset.id)}
           >
-            <div
-              className="w-3 h-3 rounded-sm shrink-0"
-              style={{ backgroundColor: preset.color }}
-            />
-            <span className="text-sm text-[var(--color-text)] truncate flex-1">
-              {preset.name}
-            </span>
+            <button
+              className="flex items-center gap-2 px-2 py-1.5 flex-1 min-w-0 text-left"
+              onClick={() => handlePresetClick(preset.id)}
+              aria-pressed={activePresetId === preset.id}
+            >
+              <div
+                aria-hidden="true"
+                className="w-3 h-3 rounded-sm shrink-0"
+                style={{ backgroundColor: preset.color }}
+              />
+              <span className="text-sm text-[var(--color-text)] truncate flex-1">
+                {preset.name}
+              </span>
+            </button>
             {mode === "calibration" && (
               <button
-                className="opacity-0 group-hover:opacity-100 text-xs text-[var(--color-danger)] hover:text-red-400 transition-opacity"
-                onClick={(e) => {
-                  e.stopPropagation();
+                className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pr-2 text-xs text-[var(--color-danger)] hover:text-red-400 transition-opacity"
+                onClick={() => {
                   if (deleteConfirmId === preset.id) {
                     handleDeletePreset(preset.id);
                   } else {
                     setDeleteConfirmId(preset.id);
                   }
                 }}
+                aria-label={`Delete preset ${preset.name}`}
               >
                 {deleteConfirmId === preset.id ? "Confirm?" : "Delete"}
               </button>
