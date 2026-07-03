@@ -220,6 +220,28 @@ describe("app-store", () => {
     });
   });
 
+  describe("profiles", () => {
+    it("initializes with empty profiles", () => {
+      expect(useAppStore.getState().profiles).toEqual([]);
+      expect(useAppStore.getState().activeProfileId).toBeNull();
+    });
+
+    it("sets profiles and active profile id", () => {
+      const profiles = [
+        {
+          id: "p1",
+          name: "Main Hall",
+          camera_fov_degrees: 60,
+          presets: [],
+        },
+      ];
+      useAppStore.getState().setProfiles(profiles);
+      useAppStore.getState().setActiveProfileId("p1");
+      expect(useAppStore.getState().profiles).toEqual(profiles);
+      expect(useAppStore.getState().activeProfileId).toBe("p1");
+    });
+  });
+
   describe("endpoints", () => {
     it("initializes with empty endpoints", () => {
       expect(useAppStore.getState().endpoints).toEqual([]);

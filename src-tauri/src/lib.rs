@@ -151,6 +151,7 @@ pub fn run() {
             commands::presets::update_preset,
             commands::presets::delete_preset,
             commands::presets::get_profiles,
+            commands::presets::get_active_profile_id,
             commands::presets::save_profile,
             commands::presets::load_profile,
             commands::presets::delete_profile,

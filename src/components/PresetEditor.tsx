@@ -2,11 +2,21 @@ import { useState } from "react";
 
 interface PresetEditorProps {
   initialName?: string;
+  label?: string;
+  placeholder?: string;
+  saveLabel?: string;
   onSave: (name: string) => void;
   onCancel: () => void;
 }
 
-export function PresetEditor({ initialName = "", onSave, onCancel }: PresetEditorProps) {
+export function PresetEditor({
+  initialName = "",
+  label = "Preset Name",
+  placeholder = "e.g., Front Row Center",
+  saveLabel = "Save Position",
+  onSave,
+  onCancel,
+}: PresetEditorProps) {
   const [name, setName] = useState(initialName);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -20,13 +30,13 @@ export function PresetEditor({ initialName = "", onSave, onCancel }: PresetEdito
     <div className="mt-2 p-3 bg-[var(--color-bg-card)] rounded-lg border border-[var(--color-border)]">
       <form onSubmit={handleSubmit}>
         <label className="block text-xs text-[var(--color-text-muted)] mb-1">
-          Preset Name
+          {label}
         </label>
         <input
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="e.g., Front Row Center"
+          placeholder={placeholder}
           className="w-full px-2 py-1.5 text-sm bg-[var(--color-bg-dark)] border border-[var(--color-border)] rounded text-[var(--color-text)] placeholder:text-[var(--color-text-muted)] focus:outline-none focus:border-[var(--color-primary)]"
           autoFocus
         />
@@ -36,7 +46,7 @@ export function PresetEditor({ initialName = "", onSave, onCancel }: PresetEdito
             disabled={!name.trim()}
             className="flex-1 px-3 py-1.5 text-sm bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            Save Position
+            {saveLabel}
           </button>
           <button
             type="button"
