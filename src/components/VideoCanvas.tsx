@@ -6,12 +6,13 @@ import { PresetOverlay } from "./PresetOverlay";
 import { SimulatedFeed } from "./SimulatedFeed";
 
 export function VideoCanvas() {
-  const { videoRef, error } = useVideoFeed();
+  const { videoRef, error, connecting } = useVideoFeed();
   const { handleVideoClick, handleVideoScroll } = usePtzControl();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const mode = useAppStore((s) => s.mode);
   const isConnected = useAppStore((s) => s.isConnected);
+  const connectionLabel = useAppStore((s) => s.connectionLabel);
   const setIsConnected = useAppStore((s) => s.setIsConnected);
   const setConnectionLabel = useAppStore((s) => s.setConnectionLabel);
   const endpoints = useAppStore((s) => s.endpoints);
@@ -93,17 +94,29 @@ export function VideoCanvas() {
         />
       )}
 
-      {/* No signal indicator */}
+      {/* Connecting / no signal indicator */}
       {!isConnected && !isSimulated && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-[var(--color-text-muted)] mb-2">
-              No Signal
+          {connecting ? (
+            <div className="text-center">
+              <div
+                aria-hidden="true"
+                className="mx-auto mb-3 h-6 w-6 rounded-full border-2 border-[var(--color-text-muted)] border-t-transparent animate-spin"
+              />
+              <div className="text-sm text-[var(--color-text-muted)]">
+                Connecting to {connectionLabel}&hellip;
+              </div>
             </div>
-            <div className="text-sm text-[var(--color-text-muted)]">
-              {error || "Select a video source to begin"}
+          ) : (
+            <div className="text-center">
+              <div className="text-2xl font-bold text-[var(--color-text-muted)] mb-2">
+                No Signal
+              </div>
+              <div className="text-sm text-[var(--color-text-muted)]">
+                {error || "Select a video source to begin"}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
 

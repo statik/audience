@@ -17,6 +17,7 @@ export function useVideoFeed() {
     (e) => e.id === activeEndpointId,
   )?.protocol === "Simulated";
   const [error, setError] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
   const reconnectTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -43,6 +44,7 @@ export function useVideoFeed() {
     async (deviceId: string) => {
       try {
         stopCurrentStream();
+        setConnecting(true);
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { deviceId: { exact: deviceId } },
         });
@@ -51,11 +53,13 @@ export function useVideoFeed() {
           videoRef.current.srcObject = stream;
           // Wait for video to actually start playing
           videoRef.current.onloadeddata = () => {
+            setConnecting(false);
             setIsConnected(true);
             setError(null);
           };
         }
       } catch (err) {
+        setConnecting(false);
         setError(`Failed to access device: ${err}`);
         setIsConnected(false);
       }
@@ -66,14 +70,17 @@ export function useVideoFeed() {
   const connectToMjpeg = useCallback(
     (url: string) => {
       stopCurrentStream();
+      setConnecting(true);
       if (videoRef.current) {
         videoRef.current.src = url;
         // Don't set connected until data actually loads
         videoRef.current.onloadeddata = () => {
+          setConnecting(false);
           setIsConnected(true);
           setError(null);
         };
         videoRef.current.onerror = () => {
+          setConnecting(false);
           setIsConnected(false);
           setError("MJPEG stream connection failed");
         };
@@ -88,6 +95,7 @@ export function useVideoFeed() {
 
     if (!activeSource) {
       stopCurrentStream();
+      setConnecting(false);
       setIsConnected(false);
       setConnectionLabel("No source selected");
       return;
@@ -105,6 +113,7 @@ export function useVideoFeed() {
           const mjpegUrl = `http://127.0.0.1:${port}/stream`;
           connectToMjpeg(mjpegUrl);
         } catch (err) {
+          setConnecting(false);
           setError(`Failed to start NDI stream: ${err}`);
           setIsConnected(false);
         }
@@ -227,6 +236,7 @@ export function useVideoFeed() {
   return {
     videoRef,
     error,
+    connecting,
     enumerateDevices,
   };
 }

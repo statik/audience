@@ -2,6 +2,7 @@ import { useState } from "react";
 import { usePresets } from "../hooks/usePresets";
 import { usePtzControl } from "../hooks/usePtzControl";
 import { useAppStore } from "../store/app-store";
+import { ConfirmButton } from "./ConfirmButton";
 import { PresetEditor } from "./PresetEditor";
 
 export function PresetList() {
@@ -10,7 +11,6 @@ export function PresetList() {
   const mode = useAppStore((s) => s.mode);
   const currentPosition = useAppStore((s) => s.currentPosition);
   const [showEditor, setShowEditor] = useState(false);
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const { recallPreset } = usePtzControl();
 
   const handlePresetClick = (presetId: string) => {
@@ -34,9 +34,9 @@ export function PresetList() {
     setShowEditor(false);
   };
 
-  const handleDeletePreset = async (presetId: string) => {
-    await deletePreset(presetId);
-    setDeleteConfirmId(null);
+  const handleDeletePreset = (presetId: string) => {
+    // Failures surface as a toast from usePresets
+    deletePreset(presetId).catch(() => {});
   };
 
   return (
@@ -75,22 +75,22 @@ export function PresetList() {
               </span>
             </button>
             {mode === "calibration" && (
-              <button
+              <ConfirmButton
                 className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pr-2 text-xs text-[var(--color-danger)] hover:text-red-400 transition-opacity"
-                onClick={() => {
-                  if (deleteConfirmId === preset.id) {
-                    handleDeletePreset(preset.id);
-                  } else {
-                    setDeleteConfirmId(preset.id);
-                  }
-                }}
+                label="Delete"
+                onConfirm={() => handleDeletePreset(preset.id)}
                 aria-label={`Delete preset ${preset.name}`}
-              >
-                {deleteConfirmId === preset.id ? "Confirm?" : "Delete"}
-              </button>
+              />
             )}
           </div>
         ))}
+        {presets.length === 0 && (
+          <p className="text-sm text-[var(--color-text-muted)]">
+            {mode === "calibration"
+              ? "No presets yet. Position the camera, then click + Add Preset."
+              : "No presets yet. Switch to Calibration mode to add presets."}
+          </p>
+        )}
       </div>
 
       {mode === "calibration" && (

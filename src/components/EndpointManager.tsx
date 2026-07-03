@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useEndpoints } from "../hooks/useEndpoints";
+import { ConfirmButton } from "./ConfirmButton";
 import type { CameraEndpoint, ProtocolConfig, PtzProtocol } from "@shared/types";
 
 function generateId(): string {
@@ -89,10 +90,9 @@ export function EndpointManager() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Delete this endpoint?")) {
-      await deleteEndpoint(id);
-    }
+  const handleDelete = (id: string) => {
+    // Failures surface as a toast from useEndpoints
+    deleteEndpoint(id).catch(() => {});
   };
 
   return (
@@ -139,12 +139,12 @@ export function EndpointManager() {
             >
               Edit
             </button>
-            <button
+            <ConfirmButton
               className="text-xs text-[var(--color-danger)] hover:text-red-400"
-              onClick={() => handleDelete(ep.id)}
-            >
-              Delete
-            </button>
+              label="Delete"
+              onConfirm={() => handleDelete(ep.id)}
+              aria-label={`Delete endpoint ${ep.name}`}
+            />
           </div>
         ))}
         {endpoints.length === 0 && (

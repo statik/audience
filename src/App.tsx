@@ -46,7 +46,7 @@ export default function App() {
             <div className="flex-1 overflow-y-auto">
               <PresetList />
               <div className="border-t border-[var(--color-border)] p-3">
-                <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">
+                <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-2">
                   Endpoints
                 </h3>
                 <EndpointManager />

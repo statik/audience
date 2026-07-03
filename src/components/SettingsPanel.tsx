@@ -2,6 +2,14 @@ import { useAppStore } from "../store/app-store";
 import { useSettings } from "../hooks/useSettings";
 import { Modal } from "./Modal";
 
+// Mirrors AppConfig::default() in src-tauri/src/persistence/config.rs
+const SETTINGS_DEFAULTS = {
+  click_sensitivity: 0.1,
+  scroll_sensitivity: 0.05,
+  overlay_opacity: 0.3,
+  camera_fov_degrees: 60,
+};
+
 export function SettingsPanel() {
   const setSettingsOpen = useAppStore((s) => s.setSettingsOpen);
   const { settings, updateSetting } = useSettings();
@@ -15,7 +23,8 @@ export function SettingsPanel() {
             Click Sensitivity
           </label>
           <p className="text-xs text-[var(--color-text-muted)] mb-2">
-            How much the camera moves per click (default: 0.1)
+            How much the camera moves per click (default:{" "}
+            {SETTINGS_DEFAULTS.click_sensitivity})
           </p>
           <input
             type="range"
@@ -39,7 +48,8 @@ export function SettingsPanel() {
             Scroll Sensitivity
           </label>
           <p className="text-xs text-[var(--color-text-muted)] mb-2">
-            How fast zoom changes on scroll (default: 0.05)
+            How fast zoom changes on scroll (default:{" "}
+            {SETTINGS_DEFAULTS.scroll_sensitivity})
           </p>
           <input
             type="range"
@@ -63,7 +73,8 @@ export function SettingsPanel() {
             Overlay Opacity
           </label>
           <p className="text-xs text-[var(--color-text-muted)] mb-2">
-            Transparency of preset overlays (10%-90%)
+            Transparency of preset overlays (10%-90%, default:{" "}
+            {Math.round(SETTINGS_DEFAULTS.overlay_opacity * 100)}%)
           </p>
           <input
             type="range"
@@ -87,7 +98,8 @@ export function SettingsPanel() {
             Camera FOV (degrees)
           </label>
           <p className="text-xs text-[var(--color-text-muted)] mb-2">
-            Horizontal field of view at 1x zoom
+            Horizontal field of view at 1x zoom (default:{" "}
+            {SETTINGS_DEFAULTS.camera_fov_degrees}&deg;)
           </p>
           <input
             type="number"
