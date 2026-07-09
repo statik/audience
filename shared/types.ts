@@ -22,6 +22,15 @@ export type ProtocolConfig =
   | { type: "BirdDogRest"; host: string; port: number }
   | { type: "Simulated" };
 
+/**
+ * Optional operations the active protocol implementation supports.
+ * Mirrors `PtzCapabilities` in src-tauri/src/ptz/controller.rs.
+ */
+export interface PtzCapabilities {
+  focus: boolean;
+  autofocus: boolean;
+}
+
 /** A camera endpoint for PTZ control. */
 export interface CameraEndpoint {
   id: string;
@@ -66,6 +75,18 @@ export interface AppSettings {
   camera_fov_degrees: number;
   active_profile_id?: string;
   video_source?: VideoSourceConfig;
+}
+
+/** Kind of a transient notification toast. */
+export type ToastKind = "error" | "warning" | "success" | "info";
+
+/** A transient notification shown by the toast host. */
+export interface Toast {
+  id: string;
+  /** Toasts with the same key replace each other instead of stacking. */
+  key?: string;
+  kind: ToastKind;
+  message: string;
 }
 
 /** NDI source descriptor. */

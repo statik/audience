@@ -81,6 +81,17 @@ pub async fn get_profiles(state: tauri::State<'_, AppState>) -> Result<Vec<Prese
     Ok(profiles.get_profiles())
 }
 
+/// Get the ID of the active profile, creating the default profile first
+/// if none exist yet.
+#[tauri::command]
+pub async fn get_active_profile_id(
+    state: tauri::State<'_, AppState>,
+) -> Result<Option<String>, String> {
+    let mut profiles = state.profiles.lock().await;
+    profiles.ensure_default_profile()?;
+    Ok(profiles.get_active_profile().map(|p| p.id.clone()))
+}
+
 /// Save (create or update) a profile.
 #[tauri::command]
 pub async fn save_profile(

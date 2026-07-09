@@ -5,9 +5,18 @@ import type {
   CameraEndpoint,
   Preset,
   PresetProfile,
+  PtzCapabilities,
   PtzPosition,
+  Toast,
   VideoSource,
 } from "@shared/types";
+
+/** Health of the active PTZ endpoint, derived from command outcomes. */
+export type PtzStatus = "idle" | "ok" | "error";
+
+const MAX_TOASTS = 5;
+
+let nextToastId = 0;
 
 interface AppState {
   // Mode
@@ -42,6 +51,14 @@ interface AppState {
   currentPosition: PtzPosition;
   setCurrentPosition: (pos: PtzPosition) => void;
 
+  // PTZ capabilities of the active endpoint
+  ptzCapabilities: PtzCapabilities | null;
+  setPtzCapabilities: (caps: PtzCapabilities | null) => void;
+
+  // Autofocus state (assumed on; cameras default to AF)
+  afEnabled: boolean;
+  setAfEnabled: (enabled: boolean) => void;
+
   // Settings
   settings: AppSettings;
   setSettings: (settings: AppSettings) => void;
@@ -51,6 +68,8 @@ interface AppState {
   toggleSidebar: () => void;
   settingsOpen: boolean;
   setSettingsOpen: (open: boolean) => void;
+  shortcutsHelpOpen: boolean;
+  setShortcutsHelpOpen: (open: boolean) => void;
 
   // Connection
   isConnected: boolean;
@@ -59,6 +78,13 @@ interface AppState {
   setFps: (fps: number) => void;
   connectionLabel: string;
   setConnectionLabel: (label: string) => void;
+  ptzStatus: PtzStatus;
+  setPtzStatus: (status: PtzStatus) => void;
+
+  // Toasts
+  toasts: Toast[];
+  pushToast: (toast: Omit<Toast, "id">) => void;
+  dismissToast: (id: string) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -94,6 +120,14 @@ export const useAppStore = create<AppState>((set) => ({
   currentPosition: { pan: 0, tilt: 0, zoom: 0 },
   setCurrentPosition: (currentPosition) => set({ currentPosition }),
 
+  // PTZ capabilities
+  ptzCapabilities: null,
+  setPtzCapabilities: (ptzCapabilities) => set({ ptzCapabilities }),
+
+  // Autofocus
+  afEnabled: true,
+  setAfEnabled: (afEnabled) => set({ afEnabled }),
+
   // Settings
   settings: {
     click_sensitivity: 0.1,
@@ -109,6 +143,8 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
   settingsOpen: false,
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
+  shortcutsHelpOpen: false,
+  setShortcutsHelpOpen: (shortcutsHelpOpen) => set({ shortcutsHelpOpen }),
 
   // Connection
   isConnected: false,
@@ -117,4 +153,22 @@ export const useAppStore = create<AppState>((set) => ({
   setFps: (fps) => set({ fps }),
   connectionLabel: "No source selected",
   setConnectionLabel: (connectionLabel) => set({ connectionLabel }),
+  ptzStatus: "idle",
+  setPtzStatus: (ptzStatus) => set({ ptzStatus }),
+
+  // Toasts
+  toasts: [],
+  pushToast: (toast) =>
+    set((state) => {
+      // Same-key toasts replace the existing one (with a fresh id, so the
+      // auto-dismiss timer restarts) instead of stacking — rapid-fire
+      // command failures coalesce into a single toast.
+      const kept = toast.key
+        ? state.toasts.filter((t) => t.key !== toast.key)
+        : state.toasts;
+      const id = `toast-${++nextToastId}`;
+      return { toasts: [...kept, { ...toast, id }].slice(-MAX_TOASTS) };
+    }),
+  dismissToast: (id) =>
+    set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) })),
 }));

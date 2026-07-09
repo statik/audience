@@ -60,6 +60,11 @@ export function useKeyboardShortcuts() {
         case "H":
           home();
           break;
+        case "?": {
+          const store = useAppStore.getState();
+          store.setShortcutsHelpOpen(!store.shortcutsHelpOpen);
+          break;
+        }
         default:
           if (/^[1-9]$/.test(e.key)) {
             const idx = parseInt(e.key) - 1;

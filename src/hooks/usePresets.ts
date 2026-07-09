@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useAppStore } from "../store/app-store";
+import { notifyError } from "../utils/notify";
 import type { Preset } from "@shared/types";
 
 const PRESET_COLORS = [
@@ -21,6 +22,7 @@ export function usePresets() {
       setPresets(result);
     } catch (err) {
       console.error("Failed to load presets:", err);
+      notifyError("Failed to load presets", err);
     }
   }, [setPresets]);
 
@@ -41,6 +43,7 @@ export function usePresets() {
         return preset;
       } catch (err) {
         console.error("Failed to create preset:", err);
+        notifyError("Failed to create preset", err);
         throw err;
       }
     },
@@ -56,6 +59,7 @@ export function usePresets() {
         return updated;
       } catch (err) {
         console.error("Failed to update preset:", err);
+        notifyError("Failed to update preset", err);
         throw err;
       }
     },
@@ -73,6 +77,7 @@ export function usePresets() {
         }
       } catch (err) {
         console.error("Failed to delete preset:", err);
+        notifyError("Failed to delete preset", err);
         throw err;
       }
     },
