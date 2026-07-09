@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/statik/audience/compare/v1.3.0...v1.4.0) (2026-07-09)
+
+
+### Features
+
+* UI polish and usability improvements ([#68](https://github.com/statik/audience/issues/68)) ([7fcaae5](https://github.com/statik/audience/commit/7fcaae566f36caddc3a7b6bbb9d73171c7e431ff))
+
 # [1.3.0](https://github.com/statik/audience/compare/v1.2.2...v1.3.0) (2026-02-19)
 
 
