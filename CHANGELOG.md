@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/statik/audience/compare/v1.4.0...v1.4.1) (2026-07-09)
+
+
+### Bug Fixes
+
+* generate cask url for aarch64 dmg ([#63](https://github.com/statik/audience/issues/63)) ([c99ffca](https://github.com/statik/audience/commit/c99ffca7deddd9836317c3327a9d846992f74a12))
+
 # [1.4.0](https://github.com/statik/audience/compare/v1.3.0...v1.4.0) (2026-07-09)
 
 
