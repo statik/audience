@@ -101,7 +101,7 @@ cask "audience" do
   version "${VERSION}"
   sha256 "${DMG_HASH}"
 
-  url "https://github.com/${REPO}/releases/download/v#{version}/Audience_#{version}_universal.dmg"
+  url "https://github.com/${REPO}/releases/download/v#{version}/Audience_#{version}_aarch64.dmg"
   name "Audience"
   desc "PTZ camera controller with live video feed and preset management"
   homepage "https://github.com/${REPO}"
@@ -110,6 +110,8 @@ cask "audience" do
     url :url
     strategy :github_latest
   end
+
+  depends_on arch: :arm64
 
   app "Audience.app"
 end
